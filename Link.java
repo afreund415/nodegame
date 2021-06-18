@@ -22,7 +22,6 @@ public class Link {
     int sBase; 
     int sNext;
     Packet[] sWindow; 
-    int countP; 
     int lostP; 
     byte[] recvData = new byte[1024];
     int recvIndex = 0;

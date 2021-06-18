@@ -44,6 +44,8 @@ public class SR{
         ds.setSoTimeout(500);
         receive.start();
         
+
+        
     }
 
     public Link getLink(int remotePort){
@@ -57,16 +59,51 @@ public class SR{
     }
 
     public void sendMessage(String message, int remotePort, String addr) throws Exception{
-        InetAddress ip; 
-        ip = InetAddress.getByName(addr);
 
-        DatagramPacket dp = new DatagramPacket(message.getBytes(), 
-                                    message.length(), ip, remotePort);
-            
-        ds.send(dp);
-
-        printMessage(message);
+        Send send = new Send(message.getBytes(), remotePort, addr);
+        send.start();
     }
+
+    public void sendDatagram(Packet p, int remotePort, String addr)throws Exception{
+        InetAddress ip = InetAddress.getByName(addr);
+        DatagramPacket dp = new DatagramPacket(p.toBytes(), 
+                                    p.length(), ip, remotePort);
+        ds.send(dp);
+    }
+
+    class Send extends Thread{
+        int remotePort; 
+        byte[] data; 
+        String addr; 
+        Link l;
+        public Send(byte[] data, int remotePort, String addr){
+            this.data = data; 
+            this.remotePort = remotePort; 
+            this.addr = addr;  
+            l = getLink(remotePort);    
+        }
+        public void run(){
+
+            try{
+                for (int i = 0; i < data.length; i++){
+                    while(l.sNext-l.sBase > windw){
+                        sleepMs(100);
+                    }
+                    byte status = (i == data.length - 1) ? STATUS_MSG | STATUS_EOM:STATUS_MSG;
+                    byte[] b = new byte[1];
+                    b[0] = data[i];
+                    Packet p = new Packet(b,l.sNext, status);
+                    l.sWindow[l.sNext++ % windw] = p;
+                    sendDatagram(p, remotePort, addr);
+                }
+            }
+
+            catch(Exception e){
+                printError(e.getMessage());
+            }
+        }
+    }
+
 
     class Receive extends Thread{
 
@@ -89,6 +126,7 @@ public class SR{
                         Packet p = new Packet(dp.getData(), dp.getLength());
 
                         Link l = getLink(remotePort);
+                        sendACK(p, remotePort, addr);
 
                         if ((p.status & STATUS_MSG) != 0){
                             Packet pOld = l.rWindow[p.seq % windw];
@@ -107,12 +145,12 @@ public class SR{
                                 pOld = l.rWindow[i % windw];
 
                                 if (pOld != null && pOld.seq == i){
-                                    l.rBase +=1; 
                                     l.recvIndex += pOld.copy(l.recvData, l.recvIndex);
                                     l.rBase = i + 1;
 
-                                    if ((p.status & STATUS_EOM) !=0){
+                                    if ((pOld.status & STATUS_EOM) !=0){
                                         recvMessage(l.recvData, l.recvIndex);
+                                        l.recvIndex = 0;
                                     }
                                 }
                                 else{
@@ -122,13 +160,26 @@ public class SR{
                         }
 
                         else if((p.status & STATUS_ACK) != 0){
+                            Packet pACK = l.sWindow[p.seq % windw];
+
+                            if (pACK != null && pACK.seq == p.seq){
+                                pACK.status = (byte) (pACK.status | STATUS_MOK);
 
 
-                        }
+                            for (int i = l.sBase; i < l.sNext; i++){
+                                pACK = l.sWindow[i % windw];
+
+                                if (pACK != null && (pACK.status & STATUS_MOK) !=0){
+                                    l.sBase = i + 1;
+                                }
+                                else{
+                                    break;
+                                }
+                            }
+                            }
 
 
-
-                                                
+                        }    
                     }
                 }
                 catch(SocketTimeoutException e){}
@@ -142,6 +193,11 @@ public class SR{
         } 
     }
 
+    private void sendACK(Packet p, int remotePort, String addr) throws Exception{
+        Packet pACK = new Packet(p.seq,STATUS_ACK);
+        sendDatagram(pACK, remotePort, addr);
+    }
+
 
     private void recvMessage(byte[] data, int len){
         String s = new String(data);
@@ -149,10 +205,18 @@ public class SR{
         printMessage(s);
     }
 
+    public void sleepMs(int i){
+        try{
+            Thread.sleep(i);
+        }
+        catch(Exception e){
+        }
+    }
+
     //prints messages
     public static void printMessage(String s){
     System.out.println(s);
-    System.out.print(">>> ");
+    //System.out.print(">>> ");
     }
     //prints error messages
     public static void printError(String s){

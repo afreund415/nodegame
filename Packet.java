@@ -18,6 +18,14 @@ public class Packet {
         this.status = status;
         System.arraycopy(data, 0, this.data, 5, data.length);
     }
+    //for ACKs
+    public Packet(int seq, byte status){
+        //dataless packet for acks
+        this.data = new byte[5];
+        this.seq = seq;
+        this.status = status;
+
+    }
 
     //receiving packet
     public Packet(byte[] data, int len){
@@ -34,11 +42,15 @@ public class Packet {
     }
 
     public int copy(byte[] bytes, int index){
-        int len = data.length - index;
+        int len = data.length - 5;
 
         System.arraycopy(data, 5, bytes, index, len);
         
          return len;
+    }
+
+    public int length(){
+        return data.length;
     }
     
     
