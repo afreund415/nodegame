@@ -1,3 +1,12 @@
+import java.util.Arrays;
+
+/* 
+Andreas Carlos Freund
+Acf2175
+CSEE-4119 Computer Networks
+Programming Assignment #2
+*/
+
 
 
 
@@ -9,6 +18,8 @@ public class Packet {
     int seq; 
     byte status; 
     byte[] data;
+    long millis; 
+    
     
     //sending packet
     public Packet(byte[] data, int seq, byte status){
@@ -51,6 +62,16 @@ public class Packet {
 
     public int length(){
         return data.length;
+    }
+
+    public String toString(){
+        String out = (status & SR.STATUS_ACK) !=0 ? "ACK ":"packet ";
+        out += seq;
+        if (data.length > 5){
+            byte[] msg = Arrays.copyOfRange(data, 5, data.length);
+            out += " \"" + new String(msg) + "\"";
+        }
+        return out;
     }
     
     

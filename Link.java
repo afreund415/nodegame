@@ -24,7 +24,13 @@ public class Link {
     Packet[] sWindow; 
     int lostP; 
     byte[] recvData = new byte[1024];
+    String addr = "127.0.0.1";
     int recvIndex = 0;
+    int recvCount; 
+    int recvLoss; 
+    int sendCount; 
+    int sendLoss;
+    
 
     public Link(int remotePort, int windowSize){
         rWindow = new Packet[windowSize];

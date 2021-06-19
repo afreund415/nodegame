@@ -24,13 +24,35 @@ public class SRNode {
         while (running){
 
             String s = input.nextLine().trim();
+            String[] newArgs = s.split(" ");
 
-            if (s.indexOf("send") == 0){
-                s = s.substring(5);
-                node.sendMessage(s, remotePort, addr);  
-            }
+            switch (newArgs[0]){
+
+                case "send":
+                    s = s.substring(5);
+                    node.sendMessage(s, remotePort, addr);  
+                    break;
+
+                case "sendtest":
+                    //node.noDropACK = true;
+
+                    String outString = "";
+
+                    int charCount = Integer.parseInt(newArgs[1]);
+
+                    for (int i = 0; i < charCount; i++){
+
+                        char c = (char) ((node.random.nextInt(97) & 0xff) + 32);
+                        
+                        outString += c;
+                    }
+                    node.sendMessage(outString, remotePort, addr);
+                    break;
+                
+                default:
+                    SR.printError("Unknown command");
+            }     
         }
-
         input.close();
     }
 
@@ -51,7 +73,7 @@ public class SRNode {
                     break;
 
                 case "-p":
-                    pLoss = (Math.round(Float.parseFloat(args[4])) * 100);
+                    pLoss = (Math.round(Float.parseFloat(args[4]) * 100));
                     break;
                 default:
                     System.out.println(("nada given"));
@@ -61,11 +83,7 @@ public class SRNode {
             running = true; 
 
         }
-
         catch (Exception E) {
         }
-        ;
-
     }
-
 }

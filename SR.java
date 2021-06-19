@@ -7,6 +7,9 @@ Programming Assignment #2
 */
 import java.net.*;
 import java.util.*;
+import java.text.SimpleDateFormat;
+
+
 
 
 
@@ -18,11 +21,16 @@ public class SR{
     int pLoss; 
     int dLoss; 
     Receive receive; 
+    SendHelper sendHelper;
+    Random random = new Random();
+    int deterCount = 0;
     //Send send; 
     DatagramSocket ds;
     boolean running;
     HashMap<Integer, Link> links = new HashMap<Integer, Link>();
+    boolean noDropACK = false;
     static boolean debug = false;
+    static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
     final static byte STATUS_MSG = 0x01; 
     final static byte STATUS_EOM = 0x02; 
     final static byte STATUS_ACK = 0x04; 
@@ -39,13 +47,12 @@ public class SR{
         this.pLoss = pLoss; 
         
         receive = new Receive();
+        sendHelper = new SendHelper();
         ds = new DatagramSocket(lPort);
         running = true;
         ds.setSoTimeout(500);
         receive.start();
-        
-
-        
+        sendHelper.start();
     }
 
     public Link getLink(int remotePort){
@@ -60,7 +67,7 @@ public class SR{
 
     public void sendMessage(String message, int remotePort, String addr) throws Exception{
 
-        Send send = new Send(message.getBytes(), remotePort, addr);
+        Send send = new Send(message.getBytes(), message.length(), remotePort, addr);
         send.start();
     }
 
@@ -71,13 +78,38 @@ public class SR{
         ds.send(dp);
     }
 
+    public boolean dropPacket(Packet p, Link l){
+        boolean drop = false; 
+        deterCount ++;
+        l.recvCount++;
+
+        ///allows us to toggle dropped acks off and on
+        if (noDropACK && (p.status & STATUS_ACK) != 0){
+            return false;
+        }
+
+        if (pLoss != 0 && random.nextInt(100) <= pLoss) {
+            drop = true;
+            l.recvLoss++;
+        }
+        
+        if (dLoss != 0 && ((deterCount % dLoss) == 0)){
+            drop = true;
+            l.recvLoss++;
+        }
+        return drop;
+    }
+
     class Send extends Thread{
         int remotePort; 
         byte[] data; 
         String addr; 
         Link l;
-        public Send(byte[] data, int remotePort, String addr){
+        int len;
+
+        public Send(byte[] data, int len, int remotePort, String addr){
             this.data = data; 
+            this.len = len;
             this.remotePort = remotePort; 
             this.addr = addr;  
             l = getLink(remotePort);    
@@ -85,21 +117,60 @@ public class SR{
         public void run(){
 
             try{
-                for (int i = 0; i < data.length; i++){
-                    while(l.sNext-l.sBase > windw){
+                for (int i = 0; i < len; i++){
+                    while(l.sNext-l.sBase >= windw){
                         sleepMs(100);
                     }
-                    byte status = (i == data.length - 1) ? STATUS_MSG | STATUS_EOM:STATUS_MSG;
+                    byte status = (i == len - 1) ? STATUS_MSG | STATUS_EOM:STATUS_MSG;
                     byte[] b = new byte[1];
                     b[0] = data[i];
                     Packet p = new Packet(b,l.sNext, status);
+                    p.millis = System.currentTimeMillis();
                     l.sWindow[l.sNext++ % windw] = p;
                     sendDatagram(p, remotePort, addr);
+                    l.sendCount++;
+                    printPacket(p, "", "sent");
                 }
             }
 
             catch(Exception e){
-                printError(e.getMessage());
+                printError(e.getMessage() + " Send Thread");
+            }
+            sendMessageDone(l);
+        }
+    }
+
+    //resending thread for when packets timeout
+    class SendHelper extends Thread{
+
+        public void run(){
+
+            try{
+                while(running){
+                    long millis = System.currentTimeMillis();
+
+                    for (Map.Entry<Integer, Link> entry:links.entrySet()){
+
+                        Link l = entry.getValue();
+
+                        for (int i = l.sBase; i < l.sNext; i++){
+                            Packet p = l.sWindow[i % windw];
+
+                            if ((p != null) && (p.status & STATUS_MOK) ==0 && (millis - p.millis > 500)){
+
+                                p.millis = System.currentTimeMillis();
+                                sendDatagram(p, l.remotePort, l.addr);
+                                printPacket(p, "", "timeout, resending");
+                                l.sendCount++;
+                                l.sendLoss++;
+                            }
+                        }
+                    }
+                    sleepMs(10);
+                }
+            }
+            catch(Exception e){
+                printError(e.getMessage() + " SendHelper Thread");
             }
         }
     }
@@ -126,30 +197,43 @@ public class SR{
                         Packet p = new Packet(dp.getData(), dp.getLength());
 
                         Link l = getLink(remotePort);
-                        sendACK(p, remotePort, addr);
+
+                        if (dropPacket(p, l)){
+                            printPacket(p, "", "dropped");
+                            continue;
+                        }    
 
                         if ((p.status & STATUS_MSG) != 0){
-                            Packet pOld = l.rWindow[p.seq % windw];
-
-                            if (pOld != null && pOld.seq == p.seq){
-                                printError("Duplicate packet received");
+                            sendACK(p, remotePort, addr, l);
+                            Packet pRecv = l.rWindow[p.seq % windw];
+                           
+                            if (pRecv != null && pRecv.seq == p.seq){
+                                printPacket(p, "duplicate ", "received, discarded");
+                                continue;
                             }
                             l.rWindow[p.seq % windw] = p;
-                            //send ack
-
                             if (p.seq >= l.rNext){
                                 l.rNext = p.seq + 1;
+                                printPacket(p, "", "received");
+                            }
+                            else{
+                                printPacket(p, "", "received out of order, buffered");
                             }
 
                             for (int i = l.rBase; i < l.rNext; i++){
-                                pOld = l.rWindow[i % windw];
+                                pRecv = l.rWindow[i % windw];
 
-                                if (pOld != null && pOld.seq == i){
-                                    l.recvIndex += pOld.copy(l.recvData, l.recvIndex);
+                                if (pRecv != null && pRecv.seq == i){
+
+                                    //get rid of data that exceeds internal buffer length 
+                                    if (l.recvIndex + p.length() <= l.recvData.length){
+                                        l.recvIndex += pRecv.copy(l.recvData, l.recvIndex);
+                                    }       
                                     l.rBase = i + 1;
 
-                                    if ((pOld.status & STATUS_EOM) !=0){
-                                        recvMessage(l.recvData, l.recvIndex);
+
+                                    if ((pRecv.status & STATUS_EOM) !=0){
+                                        recvMessageDone(l);
                                         l.recvIndex = 0;
                                     }
                                 }
@@ -164,28 +248,25 @@ public class SR{
 
                             if (pACK != null && pACK.seq == p.seq){
                                 pACK.status = (byte) (pACK.status | STATUS_MOK);
+                                for (int i = l.sBase; i < l.sNext; i++){
+                                    pACK = l.sWindow[i % windw];
 
-
-                            for (int i = l.sBase; i < l.sNext; i++){
-                                pACK = l.sWindow[i % windw];
-
-                                if (pACK != null && (pACK.status & STATUS_MOK) !=0){
-                                    l.sBase = i + 1;
-                                }
-                                else{
-                                    break;
+                                    if (pACK != null && (pACK.status & STATUS_MOK) !=0){
+                                        l.sBase = i + 1;
+                                    }
+                                    else{
+                                        break;
+                                    }
                                 }
                             }
-                            }
-
-
+                            printPacket(p, "", "received, sender window starts at " + l.sBase);
                         }    
                     }
                 }
                 catch(SocketTimeoutException e){}
                 catch(SocketException e){}
                 catch(Exception e){
-                    printError("receive: " + e.getMessage());
+                    printError("receive thread: " + e.getMessage());
                 }
             }
             //debug statement
@@ -193,16 +274,35 @@ public class SR{
         } 
     }
 
-    private void sendACK(Packet p, int remotePort, String addr) throws Exception{
+    private void sendACK(Packet p, int remotePort, String addr, Link l) throws Exception{
         Packet pACK = new Packet(p.seq,STATUS_ACK);
         sendDatagram(pACK, remotePort, addr);
+        l.sendCount++;
+        printPacket(pACK, "", "sent, window starts at " +  l.rBase);
     }
 
 
-    private void recvMessage(byte[] data, int len){
-        String s = new String(data);
-        s = s.substring(0, len);
-        printMessage(s);
+    private void recvMessageDone(Link l){
+        String s = new String(l.recvData);
+        s = s.substring(0, l.recvIndex);
+        int lossRate =  100 * l.recvLoss / l.recvCount;
+        printMessage("Message received: \"" + s + "\"");
+        printMessage("Summary (Receiver): " + l.recvLoss + "/" + l.recvCount + 
+            " packets dropped, loss rate = " + lossRate + "%");
+        l.recvLoss = 0;
+        l.recvCount = 0;
+    }
+
+    private void sendMessageDone(Link l){
+
+        int lossRate = 100 * l.sendLoss / l.sendCount;
+
+        printMessage("Summary (Sender): " + l.sendLoss + "/" + l.sendCount + 
+        " packets dropped, loss rate = " + lossRate + "%");
+
+        l.sendCount = 0;
+        l.sendLoss = 0;
+
     }
 
     public void sleepMs(int i){
@@ -215,8 +315,8 @@ public class SR{
 
     //prints messages
     public static void printMessage(String s){
-    System.out.println(s);
-    //System.out.print(">>> ");
+        Date date = new Date();
+        System.out.println(formatter.format(date) + " " + s);
     }
     //prints error messages
     public static void printError(String s){
@@ -227,5 +327,12 @@ public class SR{
         if (debug){
             printMessage("Debug: " + s);
         }
+    }
+
+    //print packet
+    public static void printPacket(Packet p, String leading, String trailing){
+        String out; 
+        out = " "  + leading + (p==null?"":p.toString()) + " " + trailing;         
+        printMessage(out);
     }
 }
