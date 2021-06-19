@@ -170,7 +170,7 @@ public class SR{
                 }
             }
             catch(Exception e){
-                printError(e.getMessage() + " SendHelper Thread");
+                //printError(e.getMessage() + " SendHelper Thread");
             }
         }
     }

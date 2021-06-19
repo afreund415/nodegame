@@ -16,7 +16,7 @@ public class SRNode {
     static String addr = "127.0.0.1"; 
 
     public static void main(String[] args) throws Exception {
-        // System.out.println("Hello, World!");
+        System.out.println("Hello, World it's SR Node");
         argParse(args);
 
         Scanner input = new Scanner(System.in);
@@ -83,7 +83,8 @@ public class SRNode {
             running = true; 
 
         }
-        catch (Exception E) {
+        catch (Exception e) {
+            SR.printError(e.getMessage());
         }
     }
 }
