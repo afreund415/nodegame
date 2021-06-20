@@ -3,6 +3,7 @@
 
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -10,7 +11,7 @@ import java.util.Scanner;
 public class DVNode {
     static Boolean running = false;
     static String addr = "127.0.0.1"; 
-    static HashMap<Integer, Router> routers = new HashMap<Integer, Router>();
+    static HashMap<Short, Router> routers = new HashMap<Short, Router>();
 
     //DVNode
     public static void main(String[] args) throws Exception {
@@ -25,6 +26,9 @@ public class DVNode {
             switch (newArgs[0]){
 
                 case "show":   
+                    for (Map.Entry<Short, Router> entry:routers.entrySet()){
+                        entry.getValue().printRouter();
+                    }
                     break;
 
                 default:
@@ -38,12 +42,12 @@ public class DVNode {
       
         try { 
             int pos = 0;
-            int lPort; 
+            short lPort; 
             Router router; 
 
             do{
                 if (args.length > pos){
-                    lPort = Integer.parseInt(args[pos++]);
+                    lPort = Short.parseShort(args[pos++]);
                     router = new Router(lPort);
                     routers.put(lPort, router);
                     running = true;
@@ -54,9 +58,9 @@ public class DVNode {
                 }
                        
                 while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
-                    int remotePort = Integer.parseInt(args[pos++]);
-                    int dist = (Math.round(Float.parseFloat(args[pos++]) * 100));
-                    Route r = new Route(remotePort, dist, remotePort, lPort);
+                    short remotePort = Short.parseShort(args[pos++]);
+                    short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
+                    Route r = new Route(remotePort, dist, remotePort, lPort, 'd');
                     router.addRoute(remotePort, r);
                 }
 
@@ -65,6 +69,7 @@ public class DVNode {
                     switch(args[pos++]){
 
                         case "last":
+                            router.sendRoutes();
                             return;
                         
                         case "next":

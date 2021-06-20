@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 public class SR{
 
 
-    int lPort; 
+    int localPort; 
     int windw; 
     int pLoss; 
     int dLoss; 
@@ -41,7 +41,7 @@ public class SR{
 
     public SR(int lPort, int windw, int dLoss, int pLoss) throws Exception{
 
-        this.lPort = lPort;
+        this.localPort = lPort;
         this.windw = windw; 
         this.dLoss = dLoss;
         this.pLoss = pLoss; 
@@ -67,7 +67,13 @@ public class SR{
 
     public void sendMessage(String message, int remotePort, String addr) throws Exception{
 
-        Send send = new Send(message.getBytes(), message.length(), remotePort, addr);
+        Send send = new Send(message.getBytes(), message.length(), remotePort, addr, false);
+        send.start();
+    }
+
+    public void sendMessage(byte[] message, int remotePort, String addr) throws Exception{
+
+        Send send = new Send(message, message.length, remotePort, addr, true);
         send.start();
     }
 
@@ -106,30 +112,37 @@ public class SR{
         String addr; 
         Link l;
         int len;
+        boolean sendSinglePacket = false; 
 
-        public Send(byte[] data, int len, int remotePort, String addr){
+        public Send(byte[] data, int len, int remotePort, String addr,boolean sendSinglePacket){
             this.data = data; 
             this.len = len;
             this.remotePort = remotePort; 
             this.addr = addr;  
+            this.sendSinglePacket = sendSinglePacket;
             l = getLink(remotePort);    
         }
         public void run(){
 
             try{
-                for (int i = 0; i < len; i++){
+                if (sendSinglePacket){
                     while(l.sNext-l.sBase >= windw){
                         sleepMs(100);
                     }
-                    byte status = (i == len - 1) ? STATUS_MSG | STATUS_EOM:STATUS_MSG;
-                    byte[] b = new byte[1];
-                    b[0] = data[i];
-                    Packet p = new Packet(b,l.sNext, status);
-                    p.millis = System.currentTimeMillis();
-                    l.sWindow[l.sNext++ % windw] = p;
-                    sendDatagram(p, remotePort, addr);
-                    l.sendCount++;
-                    printPacket(p, "", "sent");
+                    Packet p = new Packet(data, l.sNext, (byte) (STATUS_EOM | STATUS_MSG));
+                    sendPacket(p);
+                }
+                else{
+                    for (int i = 0; i < len; i++){
+                        while(l.sNext-l.sBase >= windw){
+                            sleepMs(100);
+                        }
+                        byte status = (i == len - 1) ? STATUS_MSG | STATUS_EOM:STATUS_MSG;
+                        byte[] b = new byte[1];
+                        b[0] = data[i];
+                        Packet p = new Packet(b,l.sNext, status);
+                        sendPacket(p);
+                    }
                 }
             }
 
@@ -138,7 +151,16 @@ public class SR{
             }
             sendMessageDone(l);
         }
+
+        private void sendPacket(Packet p) throws Exception{
+            p.millis = System.currentTimeMillis();
+            l.sWindow[l.sNext++ % windw] = p;
+            sendDatagram(p, remotePort, addr);
+            l.sendCount++;
+            printPacket(p, "", "sent");
+        }
     }
+    
 
     //resending thread for when packets timeout
     class SendHelper extends Thread{
@@ -282,7 +304,7 @@ public class SR{
     }
 
 
-    private void recvMessageDone(Link l){
+    public void recvMessageDone(Link l){
         String s = new String(l.recvData);
         s = s.substring(0, l.recvIndex);
         int lossRate =  100 * l.recvLoss / l.recvCount;
@@ -293,13 +315,11 @@ public class SR{
         l.recvCount = 0;
     }
 
-    private void sendMessageDone(Link l){
+    public void sendMessageDone(Link l){
 
         int lossRate = 100 * l.sendLoss / l.sendCount;
-
         printMessage("Summary (Sender): " + l.sendLoss + "/" + l.sendCount + 
         " packets dropped, loss rate = " + lossRate + "%");
-
         l.sendCount = 0;
         l.sendLoss = 0;
 
@@ -330,7 +350,7 @@ public class SR{
     }
 
     //print packet
-    public static void printPacket(Packet p, String leading, String trailing){
+    public void printPacket(Packet p, String leading, String trailing){
         String out; 
         out = " "  + leading + (p==null?"":p.toString()) + " " + trailing;         
         printMessage(out);

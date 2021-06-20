@@ -80,14 +80,14 @@ public class Packet {
                ((bytes[start + 1] & 0xFF) << 16) | 
                ((bytes[start + 2] & 0xFF) << 8 ) | 
                ((bytes[start + 3] & 0xFF) << 0 );
-   }
+    }
 
    private void toByteArray(int value, byte[] bytes, int start) {
         bytes[0+start] = (byte) (value >> 24); 
         bytes[1+start] = (byte) (value >> 16);
         bytes[2+start] = (byte) (value >> 8); 
         bytes[3 + start] = (byte) (value);
-   }
+    }
 
 
 }
