@@ -26,6 +26,8 @@ public class Router extends SR {
             
             if (r.mode == 'd'){
                 sendMessage(byteRoutes, r.dest, addr);
+                printMessage("Message was sent from Node " + localPort +
+                            " to Node " + r.dest);
             }
         }
 
@@ -42,7 +44,8 @@ public class Router extends SR {
 
                 case 'r':
 
-                    printMessage(localPort + " received routes");
+                    printMessage("Message received at Node " + localPort + 
+                                " from Node " + l.remotePort);
                     //rRemote is origin of routing table
                     Route rRemote = routeMap.get((short)(l.remotePort));
 
@@ -62,7 +65,7 @@ public class Router extends SR {
                         Route r = new Route(b, i);
                         //distance to remote port
                         Route rLocal = routeMap.get(r.dest);
-                        printMessage("Route: " + r.toString());
+                        //printMessage("Route: " + r.toString());
 
                         if (r.dest == localPort || r.next == localPort){
                             continue;
@@ -83,6 +86,7 @@ public class Router extends SR {
                     }
                     if (hasChanged){
                         sendRoutes();
+                        printRouter();
                     }
                     break;
             }
@@ -123,7 +127,7 @@ public class Router extends SR {
         printMessage(toString());
     }
 
-    public void printPacket(Packet p, String leading, String trailing){
-        return;
-    }
+    public void printPacket(Packet p, String leading, String trailing){}
+    
+    public void sendMessageDone(Link l){}
 }

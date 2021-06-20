@@ -63,6 +63,7 @@ public class DVNode {
                     Route r = new Route(remotePort, dist, remotePort, lPort, 'd');
                     router.addRoute(remotePort, r);
                 }
+                router.printRouter();
 
                 if (args.length > pos){
 
