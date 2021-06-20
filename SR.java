@@ -22,7 +22,7 @@ public class SR{
     int dLoss; 
     Receive receive; 
     SendHelper sendHelper;
-    Random random = new Random();
+    public Random random = new Random();
     int deterCount = 0;
     //Send send; 
     DatagramSocket ds;
