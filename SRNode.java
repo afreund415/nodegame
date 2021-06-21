@@ -34,7 +34,7 @@ public class SRNode {
                     break;
 
                 case "sendtest":
-                    //node.noDropACK = true;
+                    node.noDropACK = true;
 
                     String outString = "";
 

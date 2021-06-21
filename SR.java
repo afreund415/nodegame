@@ -9,16 +9,12 @@ import java.net.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
-
-
-
-
 public class SR{
 
 
     int localPort; 
     int windw; 
-    int pLoss; 
+    int lossProb; 
     int dLoss; 
     Receive receive; 
     SendHelper sendHelper;
@@ -44,7 +40,7 @@ public class SR{
         this.localPort = lPort;
         this.windw = windw; 
         this.dLoss = dLoss;
-        this.pLoss = pLoss; 
+        this.lossProb = pLoss; 
         
         receive = new Receive();
         sendHelper = new SendHelper();
@@ -59,7 +55,7 @@ public class SR{
         Link l = links.get(remotePort);
 
         if (l == null){
-            l = new Link(remotePort, windw);
+            l = new Link(remotePort, windw, lossProb);
             links.put(remotePort, l);
         }
         return l;
@@ -85,25 +81,23 @@ public class SR{
     }
 
     public boolean dropPacket(Packet p, Link l){
-        boolean drop = false; 
-        deterCount ++;
-        l.recvCount++;
-
+       
         ///allows us to toggle dropped acks off and on
         if (noDropACK && (p.status & STATUS_ACK) != 0){
             return false;
         }
-
-        if (pLoss != 0 && random.nextInt(100) <= pLoss) {
-            drop = true;
-            l.recvLoss++;
-        }
+        l.recvCount++;
         
-        if (dLoss != 0 && ((deterCount % dLoss) == 0)){
-            drop = true;
+        if (l.lossProb != 0 && random.nextInt(100) <= l.lossProb) {
             l.recvLoss++;
+            return true;
         }
-        return drop;
+        deterCount ++;
+        if (dLoss != 0 && ((deterCount % dLoss) == 0)){
+            l.recvLoss++;
+            return true;
+        }
+        return false;
     }
 
     class Send extends Thread{
@@ -202,7 +196,7 @@ public class SR{
 
         public void run(){
             //debug statement
-            printDebug("Receive Thread started ");
+            printMessage("Receive Thread started " + localPort);
             //set max # of bytes receiver can receive
             byte[] buf = new byte[1024]; 
             
@@ -292,6 +286,7 @@ public class SR{
                 }
             }
             //debug statement
+            printMessage("Receive Thread ending " + localPort);
             printDebug("Receive Thread stopped ");
         } 
     }
@@ -299,7 +294,10 @@ public class SR{
     private void sendACK(Packet p, int remotePort, String addr, Link l) throws Exception{
         Packet pACK = new Packet(p.seq,STATUS_ACK);
         sendDatagram(pACK, remotePort, addr);
-        l.sendCount++;
+
+        if (!noDropACK){
+            l.sendCount++;
+        }
         printPacket(pACK, "", "sent, window starts at " +  l.rBase);
     }
 

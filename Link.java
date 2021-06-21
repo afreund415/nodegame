@@ -22,7 +22,7 @@ public class Link {
     int sBase; 
     int sNext;
     Packet[] sWindow; 
-    int lostP; 
+    int lossProb; 
     byte[] recvData = new byte[1024];
     String addr = "127.0.0.1";
     int recvIndex = 0;
@@ -32,10 +32,11 @@ public class Link {
     int sendLoss;
     
 
-    public Link(int remotePort, int windowSize){
+    public Link(int remotePort, int windowSize, int lossProb){
         rWindow = new Packet[windowSize];
         sWindow = new Packet[windowSize];
         this.remotePort = remotePort; 
+        this.lossProb = lossProb;
     }
     
 }

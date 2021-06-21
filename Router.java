@@ -7,6 +7,7 @@ public class Router extends SR {
     HashMap<Short, Route> routeMap = new HashMap<Short, Route>();
     int routeSize = 0;
     boolean hasChanged = true;
+    Probe probe;
 
     public Router(int localPort) throws Exception{
         super(localPort, 5, 0, 0);
@@ -24,13 +25,12 @@ public class Router extends SR {
         for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
             Route r = entry.getValue();
             
-            if (r.mode == 'd'){
+            if (r.mode != 'x'){
                 sendMessage(byteRoutes, r.dest, addr);
                 printMessage("Message was sent from Node " + localPort +
                             " to Node " + r.dest);
             }
         }
-
     }
 
 
@@ -42,14 +42,16 @@ public class Router extends SR {
 
             switch (b[0]){
 
-                case 'r':
+                case 'p':
+                    printMessage("received probe message");
+                    startProbing();
+                    break;
 
+                case 'r':
                     printMessage("Message received at Node " + localPort + 
                                 " from Node " + l.remotePort);
                     //rRemote is origin of routing table
                     Route rRemote = routeMap.get((short)(l.remotePort));
-
-                   
                     //figuring out if the remote router has a better route to us(current node)
                     for (int i = 1; i < len; i+=8){
                         Route rTemp = new Route(b, i);
@@ -87,6 +89,7 @@ public class Router extends SR {
                     if (hasChanged){
                         sendRoutes();
                         printRouter();
+                        startProbing();
                     }
                     break;
             }
@@ -130,4 +133,39 @@ public class Router extends SR {
     public void printPacket(Packet p, String leading, String trailing){}
     
     public void sendMessageDone(Link l){}
+
+
+    public void startProbing(){
+
+        if (probe == null){
+            probe = new Probe();
+            probe.start();
+        }
+    }
+
+    class Probe extends Thread{
+
+        public void run(){
+            printMessage("Probe thread running " + localPort);
+        
+            try{
+                while (running){
+
+                    for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
+                        Route r = entry.getValue();
+
+                        if (r.mode == 's'){
+                            sendMessage("probe test from " + localPort + " to " + r.dest, r.dest, addr);
+                        }                            
+                    }
+                    sleepMs(100);
+                }
+            }
+            catch (Exception e){
+                printError("Probe Thread " + e.getMessage());
+            }
+            probe = null;
+            printMessage("Probe thread ending " + localPort);
+        }
+    }
 }

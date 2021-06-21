@@ -1,4 +1,3 @@
-
 /* 
 Andreas Carlos Freund
 Acf2175
@@ -6,21 +5,18 @@ CSEE-4119 Computer Networks
 Programming Assignment #2
 */
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-
-
-public class DVNode {
+public class CNNode {
     static Boolean running = false;
     static String addr = "127.0.0.1"; 
     static HashMap<Short, Router> routers = new HashMap<Short, Router>();
 
     //DVNode
     public static void main(String[] args) throws Exception {
-        System.out.println("DV Node started");
+        System.out.println("CN Node started");
         argParse(args);
         Scanner input = new Scanner(System.in);
         
@@ -63,15 +59,32 @@ public class DVNode {
                 else {
                     return;
                 }
-                //gets remote port and distance
-                while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
-                    short remotePort = Short.parseShort(args[pos++]);
-                    short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
-                    Route r = new Route(remotePort, dist, remotePort, lPort, 'd');
-                    router.addRoute(remotePort, r);
+                //getting receiving nodes
+                if (args.length > pos && args[pos++].equals("receive")){
+                    while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
+                        short remotePort = Short.parseShort(args[pos++]);
+                        short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
+                        Link l = router.getLink(remotePort);
+                        l.lossProb = dist;
+                        Route r = new Route(remotePort, (short) 100, remotePort, lPort, 'r');
+                        router.addRoute(remotePort, r);
+                    }
+                }
+                else{
+                    return;
+                }
+                //getting sending nodes
+                if (args.length > pos && args[pos++].equals("send")){
+                    while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
+                        short remotePort = Short.parseShort(args[pos++]);
+                        Route r = new Route(remotePort, (short) 100, remotePort, lPort, 's');
+                        router.addRoute(remotePort, r);
+                    }
+                }
+                else{
+                    return;
                 }
                 router.printRouter();
-
                 if (args.length > pos){
 
                     switch(args[pos++]){
@@ -94,4 +107,5 @@ public class DVNode {
             SR.printError(e.getMessage());
         }
     }
+    
 }
