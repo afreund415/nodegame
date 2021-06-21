@@ -6,14 +6,16 @@ public class Route {
     short dist;
     short next; 
     short port; 
+    short nextDist;
     char mode;
 
 
-    public Route(short dest, short dist, short next, short port, char mode){
+    public Route(short dest, short dist, short next, short port, short nextDist, char mode){
         this.dest = dest;
         this.dist = dist;
         this.next = next; 
-        this.port = port; 
+        this.port = port;
+        this.nextDist = nextDist; 
         this.mode = mode;
     }
 
@@ -26,14 +28,14 @@ public class Route {
     }
 
   
-
     public String toString(){
         String outStr;
         float fDist = (float) dist / 100; 
 
         outStr = "- (" + String.format("%.2f", fDist) + ") —> " + "Node " + dest; 
+        outStr += "[" + nextDist + "] ";
         if (next != dest){
-            outStr += " ; Next hop —> Node " + next;
+            outStr += "; Next hop —> Node " + next;
         }
         return outStr; 
     }
@@ -45,8 +47,6 @@ public class Route {
         shortToByteArray(port, bytes, start + 6);
         return start + 8; 
     }
-
-    
 
     private void shortToByteArray(short value, byte[] bytes, int start){
         bytes[0 + start] = (byte) (value >> 8); 

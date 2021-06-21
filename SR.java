@@ -20,7 +20,6 @@ public class SR{
     SendHelper sendHelper;
     public Random random = new Random();
     int deterCount = 0;
-    //Send send; 
     DatagramSocket ds;
     boolean running;
     HashMap<Integer, Link> links = new HashMap<Integer, Link>();
@@ -64,16 +63,18 @@ public class SR{
     public void sendMessage(String message, int remotePort, String addr) throws Exception{
 
         Send send = new Send(message.getBytes(), message.length(), remotePort, addr, false);
-        send.start();
+        //send.start();
+        send.l.sendQueue.add(send);
     }
 
     public void sendMessage(byte[] message, int remotePort, String addr) throws Exception{
 
         Send send = new Send(message, message.length, remotePort, addr, true);
-        send.start();
+        //send.start();
+        send.l.sendQueue.add(send);
     }
 
-    public void sendDatagram(Packet p, int remotePort, String addr)throws Exception{
+    public void sendDatagram(Packet p, int remotePort, String addr) throws Exception{
         InetAddress ip = InetAddress.getByName(addr);
         DatagramPacket dp = new DatagramPacket(p.toBytes(), 
                                     p.length(), ip, remotePort);
@@ -143,6 +144,7 @@ public class SR{
             catch(Exception e){
                 printError(e.getMessage() + " Send Thread");
             }
+            l.sending = null;
             sendMessageDone(l);
         }
 
@@ -164,16 +166,13 @@ public class SR{
             try{
                 while(running){
                     long millis = System.currentTimeMillis();
-
                     for (Map.Entry<Integer, Link> entry:links.entrySet()){
-
                         Link l = entry.getValue();
 
                         for (int i = l.sBase; i < l.sNext; i++){
                             Packet p = l.sWindow[i % windw];
 
-                            if ((p != null) && (p.status & STATUS_MOK) ==0 && (millis - p.millis > 500)){
-
+                            if ((p != null) && (p.status & STATUS_MOK) == 0 && (millis - p.millis > 500)){
                                 p.millis = System.currentTimeMillis();
                                 sendDatagram(p, l.remotePort, l.addr);
                                 printPacket(p, "", "timeout, resending");
@@ -181,12 +180,25 @@ public class SR{
                                 l.sendLoss++;
                             }
                         }
+                        if (l.sending == null && l.sendQueue.size() > 0){
+                            l.sending = l.sendQueue.get(0); 
+                            if (l.sending != null){
+                                try{
+                                    l.sending.start();
+                                    l.sendQueue.remove(0);
+                                }
+                                catch(Exception e){
+                                    printError("Couldn't access sendQueue " + e.getMessage());
+                                    l.sending = null; 
+                                }
+                            }
+                        }
                     }
-                    sleepMs(10);
+                    sleepMs(100);
                 }
             }
             catch(Exception e){
-                //printError(e.getMessage() + " SendHelper Thread");
+                printMessage(e.getMessage() + " SendHelper Thread");
             }
         }
     }

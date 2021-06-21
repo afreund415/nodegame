@@ -8,6 +8,7 @@ public class Router extends SR {
     int routeSize = 0;
     boolean hasChanged = true;
     Probe probe;
+    Boolean routeRouter = false;
 
     public Router(int localPort) throws Exception{
         super(localPort, 5, 0, 0);
@@ -16,8 +17,6 @@ public class Router extends SR {
     public void addRoute(short remotePort, Route route){
         routeMap.put(remotePort, route);
     }
-
-
 
     public void sendRoutes() throws Exception{
         hasChanged = false;
@@ -43,7 +42,23 @@ public class Router extends SR {
             switch (b[0]){
 
                 case 'p':
-                    printMessage("received probe message");
+                    printMessage("received probe message from " + l.remotePort  + " to " + localPort);
+                    //Route routeRemote = routeMap.get((short) l.remotePort);
+                    //remove later
+                    int distance = (l.recvLoss * 100) / l.recvCount; 
+                    for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
+                        Route routeRemote = entry.getValue();
+
+                        if (routeRemote.next == l.remotePort){
+                            routeRemote.dist = (short) (routeRemote.dist - routeRemote.nextDist + distance);
+                            routeRemote.nextDist = (short) distance;
+                            hasChanged = true;
+                            printMessage(localPort + routeRemote.toString() + " probe patch");
+                        }
+                    }
+                    // routeRemote.next = (short) l.remotePort;
+                    // routeRemote.dist = (short) distance;
+                    
                     startProbing();
                     break;
 
@@ -57,6 +72,7 @@ public class Router extends SR {
                         Route rTemp = new Route(b, i);
                         if (rTemp.dest == localPort && rTemp.dist < rRemote.dist){
                             rRemote = rTemp;
+                            rRemote.next = (short) l.remotePort; 
                             break;
                         } 
                     }
@@ -68,28 +84,43 @@ public class Router extends SR {
                         //distance to remote port
                         Route rLocal = routeMap.get(r.dest);
                         //printMessage("Route: " + r.toString());
-
-                        if (r.dest == localPort || r.next == localPort){
+                        if (r.dest == localPort){
+                            rLocal = routeMap.get((short) l.remotePort);
+                            //checking if we have indirect route from incoming node probe
+                            if (rLocal.dest == rLocal.next && r.dist < rLocal.dist){
+                                //rLocal.next = r.next;
+                                rLocal.dist = r.dist;
+                                printMessage(localPort + rLocal.toString() + " reverse");
+                                hasChanged = true;
+                            }
+                            else{
+                                continue;
+                            }
+                        }
+                        else if (r.next == localPort){
                             continue;
                         }
-
-                        if (rLocal == null){
+                        else if (rLocal == null){
                             rLocal = new Route(r.dest, (short) (r.dist + rRemote.dist), 
-                                    (short) l.remotePort,(short) localPort, 'x');
+                                    rRemote.next, (short) localPort, rRemote.dist, 'x');
                             addRoute(r.dest, rLocal);
+                            printMessage(localPort + rLocal.toString() + " new");
                             hasChanged = true;
                         }
                         else if(rLocal.dist > r.dist + rRemote.dist){
                             rLocal.dest = r.dest; 
+                            //rLocal.next = (short) l.remotePort;
                             rLocal.next = rRemote.next;
                             rLocal.dist = (short) (r.dist + rRemote.dist);
+                            rLocal.nextDist = rRemote.dist;
                             hasChanged = true;
+                            printMessage(localPort + rLocal.toString() + " change");
                         }
                     }
                     if (hasChanged){
                         sendRoutes();
-                        printRouter();
                         startProbing();
+                        printRouter();
                     }
                     break;
             }
@@ -120,7 +151,6 @@ public class Router extends SR {
         int i = 1;
 
         for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
-
             i = entry.getValue().toBytes(bytes, i);
         }
         return bytes;
@@ -130,13 +160,13 @@ public class Router extends SR {
         printMessage(toString());
     }
 
-    public void printPacket(Packet p, String leading, String trailing){}
+    public void printPacket(Packet p, String leading, String trailing){
+        //super.printPacket(p, leading, trailing);
+    }
     
     public void sendMessageDone(Link l){}
 
-
     public void startProbing(){
-
         if (probe == null){
             probe = new Probe();
             probe.start();
@@ -147,10 +177,10 @@ public class Router extends SR {
 
         public void run(){
             printMessage("Probe thread running " + localPort);
+            long millis = System.currentTimeMillis();
         
             try{
                 while (running){
-
                     for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
                         Route r = entry.getValue();
 
@@ -159,6 +189,12 @@ public class Router extends SR {
                         }                            
                     }
                     sleepMs(100);
+
+                    //send updated routing tables every 5 seconds
+                    if (routeRouter && System.currentTimeMillis() - millis > 5000){
+                        sendRoutes();
+                        millis = System.currentTimeMillis();
+                    }
                 }
             }
             catch (Exception e){

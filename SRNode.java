@@ -76,7 +76,7 @@ public class SRNode {
                     pLoss = (Math.round(Float.parseFloat(args[4]) * 100));
                     break;
                 default:
-                    System.out.println(("nada given"));
+                    System.out.println(("Nothing given"));
             }
 
             node = new SR(lPort, windw, dLoss, pLoss);

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /* 
 Andreas Carlos Freund
 Acf2175
@@ -30,6 +32,8 @@ public class Link {
     int recvLoss; 
     int sendCount; 
     int sendLoss;
+    ArrayList<Thread> sendQueue; 
+    Thread sending = null; 
     
 
     public Link(int remotePort, int windowSize, int lossProb){
@@ -37,6 +41,8 @@ public class Link {
         sWindow = new Packet[windowSize];
         this.remotePort = remotePort; 
         this.lossProb = lossProb;
+        sendQueue = new ArrayList<Thread>();
+
     }
     
 }
