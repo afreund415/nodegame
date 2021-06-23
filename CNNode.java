@@ -67,7 +67,7 @@ public class CNNode {
                         short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
                         Link l = router.getLink(remotePort);
                         l.lossProb = dist;
-                        Route r = new Route(remotePort, (short) 100, remotePort, lPort, (short) 100, 'r');
+                        Route r = new Route(remotePort, (short) 0, remotePort, lPort, (short) 0, 'r');
                         router.addRoute(remotePort, r);
                     }
                 }
@@ -78,7 +78,7 @@ public class CNNode {
                 if (args.length > pos && args[pos++].equals("send")){
                     while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
                         short remotePort = Short.parseShort(args[pos++]);
-                        Route r = new Route(remotePort, (short) 100, remotePort, lPort, (short) 100, 's');
+                        Route r = new Route(remotePort, (short) 0, remotePort, lPort, (short) 0, 's');
                         router.addRoute(remotePort, r);
                     }
                 }

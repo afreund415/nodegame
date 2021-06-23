@@ -5,6 +5,8 @@ Acf2175
 CSEE-4119 Computer Networks
 Programming Assignment #2
 */
+
+
 import java.net.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -61,14 +63,12 @@ public class SR{
     }
 
     public void sendMessage(String message, int remotePort, String addr) throws Exception{
-
         Send send = new Send(message.getBytes(), message.length(), remotePort, addr, false);
         //send.start();
         send.l.sendQueue.add(send);
     }
 
     public void sendMessage(byte[] message, int remotePort, String addr) throws Exception{
-
         Send send = new Send(message, message.length, remotePort, addr, true);
         //send.start();
         send.l.sendQueue.add(send);
@@ -140,7 +140,6 @@ public class SR{
                     }
                 }
             }
-
             catch(Exception e){
                 printError(e.getMessage() + " Send Thread");
             }
@@ -258,8 +257,6 @@ public class SR{
                                         l.recvIndex += pRecv.copy(l.recvData, l.recvIndex);
                                     }       
                                     l.rBase = i + 1;
-
-
                                     if ((pRecv.status & STATUS_EOM) !=0){
                                         recvMessageDone(l);
                                         l.recvIndex = 0;
@@ -276,6 +273,7 @@ public class SR{
 
                             if (pACK != null && pACK.seq == p.seq){
                                 pACK.status = (byte) (pACK.status | STATUS_MOK);
+                                
                                 for (int i = l.sBase; i < l.sNext; i++){
                                     pACK = l.sWindow[i % windw];
 
@@ -303,17 +301,17 @@ public class SR{
         } 
     }
 
+    //ack method
     private void sendACK(Packet p, int remotePort, String addr, Link l) throws Exception{
         Packet pACK = new Packet(p.seq,STATUS_ACK);
         sendDatagram(pACK, remotePort, addr);
-
         if (!noDropACK){
             l.sendCount++;
         }
         printPacket(pACK, "", "sent, window starts at " +  l.rBase);
     }
 
-
+    //final message, loss-rate calcutation method (receiver)
     public void recvMessageDone(Link l){
         String s = new String(l.recvData);
         s = s.substring(0, l.recvIndex);
@@ -325,16 +323,15 @@ public class SR{
         l.recvCount = 0;
     }
 
+    //final message, loss-rate calcutation method (sender)
     public void sendMessageDone(Link l){
-
         int lossRate = 100 * l.sendLoss / l.sendCount;
         printMessage("Summary (Sender): " + l.sendLoss + "/" + l.sendCount + 
         " packets dropped, loss rate = " + lossRate + "%");
         l.sendCount = 0;
         l.sendLoss = 0;
-
     }
-
+    //sleeper method to give threads breathing room
     public void sleepMs(int i){
         try{
             Thread.sleep(i);

@@ -5,13 +5,9 @@ Andreas Carlos Freund
 Acf2175
 CSEE-4119 Computer Networks
 Programming Assignment #2
+
+Packet class represents a single packet that is sent or received over the wire
 */
-
-
-
-
-
-//represents a single packet that is sent or received over the wire
 
 public class Packet {
 

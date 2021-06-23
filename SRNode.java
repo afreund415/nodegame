@@ -17,6 +17,11 @@ public class SRNode {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Hello, World it's SR Node");
+        // if (args.length != 4){
+        //     SR.printMessage("Too few arguments. To start SRNode do " + 
+        //     "the following: <self-port> <peer-port> <window-size> " +
+        //     "[ -d <value-of-n> | -p <value-of-p>]");
+        // }
         argParse(args);
 
         Scanner input = new Scanner(System.in);
@@ -26,22 +31,20 @@ public class SRNode {
             String s = input.nextLine().trim();
             String[] newArgs = s.split(" ");
 
+
             switch (newArgs[0]){
 
                 case "send":
                     s = s.substring(5);
-                    node.sendMessage(s, remotePort, addr);  
+                    node.sendMessage(s, remotePort, addr); 
                     break;
 
                 case "sendtest":
                     node.noDropACK = true;
-
                     String outString = "";
-
                     int charCount = Integer.parseInt(newArgs[1]);
 
                     for (int i = 0; i < charCount; i++){
-
                         char c = (char) ((node.random.nextInt(97) & 0xff) + 32);
                         
                         outString += c;
@@ -69,7 +72,6 @@ public class SRNode {
 
                 case "-d":
                     dLoss = Integer.parseInt(args[4]);
-
                     break;
 
                 case "-p":
@@ -78,13 +80,14 @@ public class SRNode {
                 default:
                     System.out.println(("Nothing given"));
             }
-
             node = new SR(lPort, windw, dLoss, pLoss);
             running = true; 
-
         }
         catch (Exception e) {
-            SR.printError(e.getMessage());
+            //SR.printError(e.getMessage());
+            SR.printMessage("Too few arguments. To start SRNode do " + 
+            "the following: <self-port> <peer-port> <window-size> " +
+            "[ -d <value-of-n> | -p <value-of-p>]");
         }
     }
 }

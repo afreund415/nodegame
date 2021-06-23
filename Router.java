@@ -1,3 +1,14 @@
+/* 
+Andreas Carlos Freund
+Acf2175
+CSEE-4119 Computer Networks
+Programming Assignment #2
+
+
+Router (with an R) class includes the router node behavior and network logic
+*/
+
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,14 +21,17 @@ public class Router extends SR {
     Probe probe;
     Boolean routeRouter = false;
 
+    //router node constructor
     public Router(int localPort) throws Exception{
         super(localPort, 5, 0, 0);
     }
 
+    //adds new route to node's router table
     public void addRoute(short remotePort, Route route){
         routeMap.put(remotePort, route);
     }
 
+    
     public void sendRoutes() throws Exception{
         hasChanged = false;
         byte[] byteRoutes = toBytes();
@@ -84,7 +98,13 @@ public class Router extends SR {
                         //distance to remote port
                         Route rLocal = routeMap.get(r.dest);
                         //printMessage("Route: " + r.toString());
-                        if (r.dest == localPort){
+                        if (rLocal != null && r.dest == rLocal.dest && rLocal.next == l.remotePort){
+                            rLocal.dist = (short) (r.dist + rRemote.dist);
+                            rLocal.nextDist = rRemote.dist;
+                            printMessage(localPort + rLocal.toString() + " increase route");
+                            hasChanged = true;
+                        } 
+                        else if (r.dest == localPort){
                             rLocal = routeMap.get((short) l.remotePort);
                             //checking if we have indirect route from incoming node probe
                             if (rLocal.dest == rLocal.next && r.dist < rLocal.dist){
@@ -95,7 +115,7 @@ public class Router extends SR {
                             }
                             else{
                                 continue;
-                            }
+                            }      
                         }
                         else if (r.next == localPort){
                             continue;
@@ -117,21 +137,22 @@ public class Router extends SR {
                             printMessage(localPort + rLocal.toString() + " change");
                         }
                     }
-                    if (hasChanged){
-                        sendRoutes();
-                        startProbing();
-                        printRouter();
-                    }
                     break;
+            }
+            if (hasChanged){
+                sendRoutes();
+                startProbing();
+                printRouter();
             }
         }
         catch(Exception e){
             printError(e.getMessage());
         }
-        finally{
-            l.recvLoss = 0;
-            l.recvCount = 0;    
-        }
+        // finally{
+        //     l.recvLoss = 0;
+        //     l.recvCount = 0; 
+
+        // }
     }   
     
     public String toString(){
@@ -191,7 +212,7 @@ public class Router extends SR {
                     sleepMs(100);
 
                     //send updated routing tables every 5 seconds
-                    if (routeRouter && System.currentTimeMillis() - millis > 5000){
+                    if (System.currentTimeMillis() - millis > 5000){
                         sendRoutes();
                         millis = System.currentTimeMillis();
                     }
