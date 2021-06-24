@@ -234,8 +234,8 @@ public class Router extends SR {
                             if (r.mode == 's'){
                                 if (System.currentTimeMillis() - sendMillis > 1000){
                                     Link l = getLink(r.dest);
-                                    printMessage(localPort +" Link to " + l.remotePort + ": " + l.sendCount + 
-                                    " packets sent, " + l.sendLoss + " packets lost, loss rate " + 
+                                    printMessage("Link from " + localPort + " to " + l.remotePort + ": " + 
+                                    l.sendCount + " packets sent, " + l.sendLoss + " packets lost, loss rate " + 
                                     (l.sendLoss * 100 / l.sendCount) + "%");
                                     sendMillis = System.currentTimeMillis();
                                 }

@@ -4,6 +4,9 @@ Andreas Carlos Freund
 Acf2175
 CSEE-4119 Computer Networks
 Programming Assignment #2
+
+
+SR class handles all selective repeat logic
 */
 
 

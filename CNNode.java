@@ -80,7 +80,7 @@ public class CNNode {
                 }
                 //getting sending nodes
                 if (args.length > pos && args[pos++].equals("send")){
-                    while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
+                    while(args.length > pos && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
                         short remotePort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
                         Route r = new Route(remotePort, (short) 0, remotePort, lPort,'s');
                         router.addRoute(remotePort, r);
@@ -96,6 +96,7 @@ public class CNNode {
 
                         case "last":
                             router.sendRoutes();
+                            router.startProbing();
                             return;
                         
                         case "next":
@@ -104,6 +105,9 @@ public class CNNode {
                         default: 
                             return;
                     }
+                }
+                else{
+                    return;
                 }
             } while(true);
         }
