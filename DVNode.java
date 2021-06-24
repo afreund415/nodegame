@@ -52,7 +52,7 @@ public class DVNode {
             do{
                 //getting local port #
                 if (args.length > pos){
-                    lPort = Short.parseShort(args[pos++]);
+                    lPort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
                     router = new Router(lPort);
                     routers.put(lPort, router);
                     running = true;
@@ -63,7 +63,7 @@ public class DVNode {
                 }
                 //gets remote port and distance
                 while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
-                    short remotePort = Short.parseShort(args[pos++]);
+                    short remotePort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
                     short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
                     Route r = new Route(remotePort, dist, remotePort, lPort, 'd');
                     router.addRoute(remotePort, r);
@@ -86,6 +86,10 @@ public class DVNode {
                     }
                 }
             } while(true);
+        }
+        //catches validate port exceptions
+        catch (IndexOutOfBoundsException e){
+            SR.printMessage(e.getMessage());
         }
         catch (Exception e) {
             running = false;

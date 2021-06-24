@@ -20,7 +20,7 @@ Running the project:
 
 Commandline options SRNode: 
 1. Send <message>, where message is any list of characters that the program can split into packets
-2. sendtest <# of characters> this allows the user to run a test that 
+2. sendtest <# of characters> this allows the user to run an emulation test where they send a message (with ACK failures turned off)  
 
 
 Commandline options DVNode: 

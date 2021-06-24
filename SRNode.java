@@ -58,8 +58,8 @@ public class SRNode {
     private static void argParse(String[] args) {
 
         try {
-            int lPort = Integer.parseInt(args[0]);
-            remotePort = Integer.parseInt(args[1]);
+            int lPort = SR.validatePort(Integer.parseInt(args[0]));
+            remotePort = SR.validatePort(Integer.parseInt(args[1]));
             int windw = Integer.parseInt(args[2]);
             int dLoss = 0;
             int pLoss = 0;
@@ -81,6 +81,10 @@ public class SRNode {
             }
             node = new SR(lPort, windw, dLoss, pLoss);
             running = true; 
+        }
+        //catches validate port exceptions
+        catch (IndexOutOfBoundsException e){
+            SR.printMessage(e.getMessage());
         }
         catch (Exception e) {
             //SR.printError(e.getMessage());

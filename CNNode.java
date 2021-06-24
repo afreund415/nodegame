@@ -16,7 +16,7 @@ public class CNNode {
 
     //DVNode
     public static void main(String[] args) throws Exception {
-        System.out.println("CN Node started");
+        System.out.println("CNNode started");
         argParse(args);
         Scanner input = new Scanner(System.in);
         
@@ -50,7 +50,7 @@ public class CNNode {
             do{
                 //construting router from CLI
                 if (args.length > pos){
-                    lPort = Short.parseShort(args[pos++]);
+                    lPort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
                     router = new Router(lPort);
                     router.noDropACK = true;
                     router.probing = true;
@@ -67,7 +67,7 @@ public class CNNode {
                 //getting receiving nodes
                 if (args.length > pos && args[pos++].equals("receive")){
                     while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
-                        short remotePort = Short.parseShort(args[pos++]);
+                        short remotePort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
                         short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
                         Link l = router.getLink(remotePort);
                         l.lossProb = dist;
@@ -81,7 +81,7 @@ public class CNNode {
                 //getting sending nodes
                 if (args.length > pos && args[pos++].equals("send")){
                     while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
-                        short remotePort = Short.parseShort(args[pos++]);
+                        short remotePort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
                         Route r = new Route(remotePort, (short) 0, remotePort, lPort,'s');
                         router.addRoute(remotePort, r);
                     }
@@ -106,6 +106,10 @@ public class CNNode {
                     }
                 }
             } while(true);
+        }
+        //catches validate port exceptions
+        catch (IndexOutOfBoundsException e){
+            SR.printMessage(e.getMessage());
         }
         catch (Exception e) {
             running = false;

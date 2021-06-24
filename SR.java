@@ -305,7 +305,6 @@ public class SR{
             }
             //debug statement
             printMessage("Receive Thread ending " + localPort);
-            printDebug("Receive Thread stopped ");
         } 
     }
 
@@ -357,17 +356,19 @@ public class SR{
     public static void printError(String s){
         printMessage("Error " + s);
     }
-    //print debug messages
-    public static void printDebug(String s){
-        if (debug){
-            printMessage("Debug: " + s);
-        }
-    }
 
     //print packet
     public void printPacket(Packet p, String leading, String trailing){
         String out; 
         out = " "  + leading + (p==null?"":p.toString()) + " " + trailing;         
         printMessage(out);
+    }
+
+    public static int validatePort(int port) throws Exception{
+        if (port > 0xffff && port < 1024){
+            throw (new IndexOutOfBoundsException("Por needs to be greater " +
+                                "than 1024 and less than 65535"));
+        }
+        return port; 
     }
 }

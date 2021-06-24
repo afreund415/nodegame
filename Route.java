@@ -93,7 +93,4 @@ public class Route {
         return (short) (((bytes[start + 0] & 0xFF) << 8 ) | 
                ((bytes[start + 1] & 0xFF) << 0 ));
     }
-
-
-    
 }
