@@ -95,7 +95,6 @@ public class CNNode {
                     switch(args[pos++]){
 
                         case "last":
-                            router.routeRouter = true;
                             router.sendRoutes();
                             return;
                         
@@ -112,6 +111,5 @@ public class CNNode {
             running = false;
             SR.printError(e.getMessage());
         }
-    }
-    
+    }  
 }

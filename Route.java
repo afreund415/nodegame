@@ -10,7 +10,6 @@ router nodes can use to updat their tables
 */
 
 import java.util.HashMap;
-import java.util.Map;
 
 
 public class Route {
@@ -19,15 +18,14 @@ public class Route {
     short dist;
     short next; 
     short port; 
+    int nextDist; 
     char mode;
     HashMap<Short, Route> incomingRoutes = new HashMap<Short, Route>();
-    boolean update; 
 
     //short route constructor  
     public Route(short dest, short dist, short next, short port, char mode){
         this.dest = dest;
         this.dist = (dest != port && dist == 0)?100: dist;
-        //this.dist = dist;
         this.next = next; 
         this.port = port;
         this.mode = mode;
@@ -57,6 +55,8 @@ public class Route {
         if (next != dest){
             outStr += "; Next hop —> Node " + next;
         }
+        //DEBUG Code
+        //outStr += " " + (char) mode;
         // if (incomingRoutes != null){
         //     for (Map.Entry<Short, Route> entry:incomingRoutes.entrySet()){
         //         Route test = entry.getValue();

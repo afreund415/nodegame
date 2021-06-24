@@ -63,16 +63,20 @@ public class SR{
         return l;
     }
 
-    public void sendMessage(String message, int remotePort, String addr) throws Exception{
-        Send send = new Send(message.getBytes(), message.length(), remotePort, addr, false);
-        //send.start();
+    public void sendMessage(String msg, int remotePort, String addr) throws Exception{
+        Send send = new Send(msg.getBytes(), msg.length(), remotePort, addr, false);
         send.l.sendQueue.add(send);
     }
 
-    public void sendMessage(byte[] message, int remotePort, String addr) throws Exception{
-        Send send = new Send(message, message.length, remotePort, addr, true);
-        //send.start();
+    public void sendMessage(byte[] msg, int remotePort, String addr) throws Exception{
+        Send send = new Send(msg, msg.length, remotePort, addr, true);
         send.l.sendQueue.add(send);
+    }
+
+    //avoids overflow of sendQueue and allows us to drop packets if buffer is full
+    public boolean sendReady(short port, int max){
+        Link l = getLink(port);
+        return l.sendQueue.size() < max; 
     }
 
     public void sendDatagram(Packet p, int remotePort, String addr) throws Exception{
@@ -202,7 +206,6 @@ public class SR{
             }
             catch(Exception e){
                 printMessage(e.getMessage() + " SendHelper Thread");
-                e.printStackTrace();
             }
         }
     }

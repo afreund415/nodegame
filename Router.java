@@ -19,7 +19,6 @@ public class Router extends SR {
     int routeSize = 0;
     boolean hasChanged = true;
     Probe probe;
-    Boolean routeRouter = false;
     short localPort;
     Route localRoute;
     public boolean probing = false; 
@@ -43,12 +42,13 @@ public class Router extends SR {
         }
     }
     
+    //sends out new routes 
     public void sendRoutes() throws Exception{
         byte[] byteRoutes = toBytes();
         for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
             Route r = entry.getValue();
             
-            if (r.mode != 'x' && r.dest != localPort){
+            if (r.mode != 'x' && r.dest != localPort && sendReady(r.dest, 5)){
                 sendMessage(byteRoutes, r.dest, addr);
                 printMessage("Route was sent from Node " + localPort +
                             " to Node " + r.dest);
@@ -63,7 +63,7 @@ public class Router extends SR {
         if(probing){    
             for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
                 Route r = entry.getValue();
-                if (r.dest != r.next && r.dest != localPort){
+                if (r.dest != localPort){
                     r.dist = infinity;
                 }
             }
@@ -82,13 +82,22 @@ public class Router extends SR {
                     
                     if (rCandidate.dest != localPort && rCandidate.next != localPort){
                         Route currentRoute = routeMap.get(rCandidate.dest); 
+                        short next = rCandidate.port == localPort? rCandidate.next:rCandidate.port;
 
                         if (currentRoute != null){
-                            if (currentRoute.dist > rCandidate.dist + distance || currentRoute.update){
+                            if (currentRoute.dist > rCandidate.dist + distance){
                                 currentRoute.dist = (short) (rCandidate.dist + distance);
-                                currentRoute.next = rCandidate.port;
-                                currentRoute.update = false;
+                                currentRoute.next = next;
+                                currentRoute.nextDist = distance;
                                 hasChanged = true;
+                            }
+                            //tiebreaker for routes with equal distance 
+                            else if (currentRoute.dist == rCandidate.dist + distance && 
+                                    currentRoute.nextDist > distance){
+                                // updates next hop
+                                currentRoute.next = next;
+                                //updates current route's next distance 
+                                currentRoute.nextDist = distance;  
                             }
                         }
                     }
@@ -97,7 +106,7 @@ public class Router extends SR {
         }
     }
 
-
+    //Once SR receives whole message, recvMessageDone handles logic 
     public void recvMessageDone(Link l){
         // b/len gives us # of total routes
         byte[] b = l.recvData;
@@ -107,18 +116,20 @@ public class Router extends SR {
 
             switch (b[0]){
 
+                //incoming probe case
                 case 'p':
                     int dist = l.recvLoss * 100 / l.recvCount;
+                    // dist = l.lossProb;
                     printMessage("Received probe message from " + l.remotePort  + 
-                                " to " + localPort + " " + dist);
+                                " to " + localPort);
                     Route rProbe = new Route((short) l.remotePort,(short) dist,
                                             (short) l.remotePort, localPort, 'x');
                     //adding probe route to externalRoute map for processing 
-                    //routeMap.get(localPort).addExternalRoute(rProbe);
                     localRoute.addExternalRoute(rProbe);
                     calcRoutes();
                     break;
 
+                //incoming routing table case
                 case 'r':
                     printMessage("Route received at Node " + localPort + 
                                 " from Node " + l.remotePort);
@@ -205,28 +216,37 @@ public class Router extends SR {
 
         public void run(){
             printMessage("Probe thread running " + localPort);
-            long millis = System.currentTimeMillis();
+            long millis = 0;
+            long sendMillis = 0; 
         
             try{
 
                 while (running){
                     //send routing tables every 5 seconds
-                    if (hasChanged && System.currentTimeMillis() - millis > 5000){
+                    if (System.currentTimeMillis() - millis > 5000){
                         sendRoutes();
                         millis = System.currentTimeMillis();
                     }
-                    //else{ 
-                    for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
-                        Route r = entry.getValue();
+                    else{
+                        for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
+                            Route r = entry.getValue();
 
-                        if (r.mode == 's'){
-                            sendMessage("probe test from " + localPort + 
-                                        " to " + r.dest, r.dest, addr);
-                            //sleepMs(10);
-                        }                            
+                            if (r.mode == 's'){
+                                if (System.currentTimeMillis() - sendMillis > 1000){
+                                    Link l = getLink(r.dest);
+                                    printMessage(localPort +" Link to " + l.remotePort + ": " + l.sendCount + 
+                                    " packets sent, " + l.sendLoss + " packets lost, loss rate " + 
+                                    (l.sendLoss * 100 / l.sendCount) + "%");
+                                    sendMillis = System.currentTimeMillis();
+                                }
+                                if (sendReady(r.dest, 3)){
+                                    sendMessage("probe>" + localPort + 
+                                                ">" + r.dest, r.dest, addr);
+                                }  
+                            }                          
+                        }
                     }
-                    //}
-                    sleepMs(250);
+                    sleepMs(500);
                 }
             }
             catch (Exception e){

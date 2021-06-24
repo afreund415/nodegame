@@ -32,8 +32,9 @@ public class SRNode {
                     node.sendMessage(s, remotePort, addr); 
                     break;
 
-                //sendtest #x allows user to send a large number of packets by dynamically creating #xyz character string to send 
-                //ie sendtest 1000 would send 1000 packets (with no ack failures) 
+                //sendtest #x allows user to send a large number of packets by dynamically 
+                //creating #xyz character string to send 
+                //Ex: sendtest 1000 would send 1000 packets (with no ack failures) 
                 case "sendtest":
                     node.noDropACK = true;
                     String outString = "";
