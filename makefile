@@ -12,6 +12,7 @@ CLASSES = \
  CNNode.java \
  SR.java \
  SRNode.java \
+ DVNode.java \
  Packet.java \
  Link.java \
  Route.java \

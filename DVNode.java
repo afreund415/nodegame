@@ -6,11 +6,9 @@ CSEE-4119 Computer Networks
 Programming Assignment #2
 */
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-
 
 
 public class DVNode {
@@ -67,7 +65,7 @@ public class DVNode {
                 while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
                     short remotePort = Short.parseShort(args[pos++]);
                     short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
-                    Route r = new Route(remotePort, dist, remotePort, lPort, dist, 'd');
+                    Route r = new Route(remotePort, dist, remotePort, lPort, 'd');
                     router.addRoute(remotePort, r);
                 }
                 router.printRouter();

@@ -33,6 +33,7 @@ public class SR{
     final static byte STATUS_ACK = 0x04; 
     //constant for checking ACK
     final static byte STATUS_MOK = 0x08; 
+    final static byte STATUS_IGN = 0x10; 
 
 
 
@@ -83,7 +84,10 @@ public class SR{
 
     public boolean dropPacket(Packet p, Link l){
        
-        ///allows us to toggle dropped acks off and on
+        if ((p.status & STATUS_IGN) !=0){
+            return false;
+        }
+        //allows us to toggle dropped acks off and on
         if (noDropACK && (p.status & STATUS_ACK) != 0){
             return false;
         }
@@ -124,7 +128,7 @@ public class SR{
                     while(l.sNext-l.sBase >= windw){
                         sleepMs(100);
                     }
-                    Packet p = new Packet(data, l.sNext, (byte) (STATUS_EOM | STATUS_MSG));
+                    Packet p = new Packet(data, l.sNext, (byte) (STATUS_EOM | STATUS_MSG | STATUS_IGN));
                     sendPacket(p);
                 }
                 else{
@@ -198,6 +202,7 @@ public class SR{
             }
             catch(Exception e){
                 printMessage(e.getMessage() + " SendHelper Thread");
+                e.printStackTrace();
             }
         }
     }

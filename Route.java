@@ -9,31 +9,43 @@ Route class creates a single route object between 2 nodes that
 router nodes can use to updat their tables
 */
 
+import java.util.HashMap;
+import java.util.Map;
+
+
 public class Route {
 
     short dest; 
     short dist;
     short next; 
     short port; 
-    short nextDist;
     char mode;
+    HashMap<Short, Route> incomingRoutes = new HashMap<Short, Route>();
+    boolean update; 
 
-    //short constructor  
-    public Route(short dest, short dist, short next, short port, short nextDist, char mode){
+    //short route constructor  
+    public Route(short dest, short dist, short next, short port, char mode){
         this.dest = dest;
-        this.dist = dist;
+        this.dist = (dest != port && dist == 0)?100: dist;
+        //this.dist = dist;
         this.next = next; 
         this.port = port;
-        this.nextDist = nextDist; 
         this.mode = mode;
     }
 
-    //byte constructor 
+    //byte route constructor 
     public Route(byte[] byteRoutes, int index){
         dest = fromByteArray(byteRoutes, index + 0);
         dist = fromByteArray(byteRoutes, index + 2);
         next = fromByteArray(byteRoutes, index + 4);
         port = fromByteArray(byteRoutes, index + 6);
+    }
+
+    //adds route from probe and neighboring node DV updates to hashmap 
+    public void addExternalRoute(Route newRoute){
+        if (incomingRoutes != null){
+            incomingRoutes.put(newRoute.dest, newRoute);
+        }
     }
 
     //route to string helper method
@@ -42,11 +54,23 @@ public class Route {
         float fDist = (float) dist / 100; 
 
         outStr = "- (" + String.format("%.2f", fDist) + ") —> " + "Node " + dest; 
-        outStr += "[" + nextDist + "] ";
         if (next != dest){
             outStr += "; Next hop —> Node " + next;
         }
+        // if (incomingRoutes != null){
+        //     for (Map.Entry<Short, Route> entry:incomingRoutes.entrySet()){
+        //         Route test = entry.getValue();
+        //         outStr += "\n                " + test.toString();
+        //     }
+        // }
         return outStr; 
+    }
+
+    //clones route to avoid recursion issues 
+    public Route clone(){
+        byte[] b = new byte[8]; 
+        toBytes(b, 0);
+        return new Route(b, 0);
     }
 
     //converts shorts to bytes for router threads

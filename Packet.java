@@ -7,6 +7,7 @@ CSEE-4119 Computer Networks
 Programming Assignment #2
 
 Packet class represents a single packet that is sent or received over the wire
+Each packet has its data, a sequence number, and a status flag 
 */
 
 public class Packet {
@@ -17,7 +18,7 @@ public class Packet {
     long millis; 
     
     
-    //sending packet
+    //packet constructor 
     public Packet(byte[] data, int seq, byte status){
 
         this.data = new byte[5+ data.length];
@@ -25,13 +26,13 @@ public class Packet {
         this.status = status;
         System.arraycopy(data, 0, this.data, 5, data.length);
     }
-    //for ACKs
+    
+    //ACK packet constructor 
     public Packet(int seq, byte status){
         //dataless packet for acks
         this.data = new byte[5];
         this.seq = seq;
         this.status = status;
-
     }
 
     //receiving packet
@@ -42,24 +43,26 @@ public class Packet {
         this.seq = fromByteArray(this.data, 1);
     }
 
+    //converts to bytes
     public byte[] toBytes(){
         data[0] = status; 
         toByteArray(seq, data, 1);
         return data;
     }
 
+    //copies packet 
     public int copy(byte[] bytes, int index){
         int len = data.length - 5;
-
-        System.arraycopy(data, 5, bytes, index, len);
-        
+        System.arraycopy(data, 5, bytes, index, len);        
          return len;
     }
 
+    //gets packet data length 
     public int length(){
         return data.length;
     }
 
+    //packet to string method 
     public String toString(){
         String out = (status & SR.STATUS_ACK) !=0 ? "ACK ":"packet ";
         out += seq;
@@ -70,7 +73,7 @@ public class Packet {
         return out;
     }
     
-    
+    //converts from byte array 
     private int fromByteArray(byte[] bytes, int start) {
         return ((bytes[start] & 0xFF) << 24) | 
                ((bytes[start + 1] & 0xFF) << 16) | 
@@ -78,7 +81,8 @@ public class Packet {
                ((bytes[start + 3] & 0xFF) << 0 );
     }
 
-   private void toByteArray(int value, byte[] bytes, int start) {
+    //converts to byte array 
+    private void toByteArray(int value, byte[] bytes, int start) {
         bytes[0+start] = (byte) (value >> 24); 
         bytes[1+start] = (byte) (value >> 16);
         bytes[2+start] = (byte) (value >> 8); 

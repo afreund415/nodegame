@@ -5,14 +5,11 @@ Andreas Carlos Freund
 Acf2175
 CSEE-4119 Computer Networks
 Programming Assignment #2
+
+
+Link class represents link between local port and remote port for sending and receiving
+
 */
-
-
-//class represents link between local port and remote port for sending and receiving
-
-//link class should also include IP addr but we have hardcoded this 
-
-//
 
 
 public class Link {

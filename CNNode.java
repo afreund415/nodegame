@@ -48,16 +48,20 @@ public class CNNode {
             Router router; 
 
             do{
-                //getting local port #
+                //construting router from CLI
                 if (args.length > pos){
                     lPort = Short.parseShort(args[pos++]);
                     router = new Router(lPort);
                     router.noDropACK = true;
+                    router.probing = true;
                     routers.put(lPort, router);
-                    running = true;
-                }
-                
+                    running = true;  
+                }  
                 else {
+                    SR.printMessage("To start CNNode, include the following args: " +
+                    "<local-port> receive <neighbor1-port> <loss-rate-1> <neighbor2-port> " +
+                    "<loss-rate-2> ... <neighborM-port> <loss-rate-M> send <neighbor(M+1)-port> " + 
+                    "<neighbor(M+2)-port> ... <neighborN-port> [last]");
                     return;
                 }
                 //getting receiving nodes
@@ -67,7 +71,7 @@ public class CNNode {
                         short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
                         Link l = router.getLink(remotePort);
                         l.lossProb = dist;
-                        Route r = new Route(remotePort, (short) 0, remotePort, lPort, (short) 0, 'r');
+                        Route r = new Route(remotePort, (short) 0, remotePort, lPort, 'r');
                         router.addRoute(remotePort, r);
                     }
                 }
@@ -78,7 +82,7 @@ public class CNNode {
                 if (args.length > pos && args[pos++].equals("send")){
                     while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
                         short remotePort = Short.parseShort(args[pos++]);
-                        Route r = new Route(remotePort, (short) 0, remotePort, lPort, (short) 0, 's');
+                        Route r = new Route(remotePort, (short) 0, remotePort, lPort,'s');
                         router.addRoute(remotePort, r);
                     }
                 }

@@ -5,7 +5,7 @@ CSEE-4119 Computer Networks
 Programming Assignment #2
 
 
-Router (with an R) class includes the router node behavior and network logic
+Router (with an R) class includes individual router node behavior and network logic
 */
 
 
@@ -20,28 +20,79 @@ public class Router extends SR {
     boolean hasChanged = true;
     Probe probe;
     Boolean routeRouter = false;
+    short localPort;
+    Route localRoute;
+    public boolean probing = false; 
+    final short infinity = 0x7fff;
 
     //router node constructor
     public Router(int localPort) throws Exception{
         super(localPort, 5, 0, 0);
+        this.localPort = (short) super.localPort;
+        localRoute = new Route((short) localPort, (short) 0, 
+                    (short) localPort, (short) localPort, 'r');
+        routeMap.put((short) localPort, localRoute);
     }
 
     //adds new route to node's router table
     public void addRoute(short remotePort, Route route){
         routeMap.put(remotePort, route);
+        //initializes distances to direct neighbors 
+        if (route.dest == route.next){
+            localRoute.addExternalRoute(route.clone());
+        }
     }
-
     
     public void sendRoutes() throws Exception{
-        hasChanged = false;
         byte[] byteRoutes = toBytes();
         for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
             Route r = entry.getValue();
             
-            if (r.mode != 'x'){
+            if (r.mode != 'x' && r.dest != localPort){
                 sendMessage(byteRoutes, r.dest, addr);
-                printMessage("Message was sent from Node " + localPort +
+                printMessage("Route was sent from Node " + localPort +
                             " to Node " + r.dest);
+            }
+        }
+        hasChanged = false;
+        sleepMs(100);
+    }
+
+    //recalculates all node routes based on external routing table updates + probes
+    private void calcRoutes(){
+        if(probing){    
+            for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
+                Route r = entry.getValue();
+                if (r.dest != r.next && r.dest != localPort){
+                    r.dist = infinity;
+                }
+            }
+        }
+        for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
+            Route r = entry.getValue();
+
+            if (r.incomingRoutes != null){
+                Route rToUs = r.incomingRoutes.get(localPort);
+                int distance = 0; 
+                if (rToUs != null){
+                    distance = rToUs.dist;
+                }
+                for (Map.Entry<Short, Route> rEntry:r.incomingRoutes.entrySet()){
+                    Route rCandidate = rEntry.getValue();
+                    
+                    if (rCandidate.dest != localPort && rCandidate.next != localPort){
+                        Route currentRoute = routeMap.get(rCandidate.dest); 
+
+                        if (currentRoute != null){
+                            if (currentRoute.dist > rCandidate.dist + distance || currentRoute.update){
+                                currentRoute.dist = (short) (rCandidate.dist + distance);
+                                currentRoute.next = rCandidate.port;
+                                currentRoute.update = false;
+                                hasChanged = true;
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -51,96 +102,52 @@ public class Router extends SR {
         // b/len gives us # of total routes
         byte[] b = l.recvData;
         int len = l.recvIndex;
+
         try{
 
             switch (b[0]){
 
                 case 'p':
-                    printMessage("received probe message from " + l.remotePort  + " to " + localPort);
-                    //Route routeRemote = routeMap.get((short) l.remotePort);
-                    //remove later
-                    int distance = (l.recvLoss * 100) / l.recvCount; 
-                    for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
-                        Route routeRemote = entry.getValue();
-
-                        if (routeRemote.next == l.remotePort){
-                            routeRemote.dist = (short) (routeRemote.dist - routeRemote.nextDist + distance);
-                            routeRemote.nextDist = (short) distance;
-                            hasChanged = true;
-                            printMessage(localPort + routeRemote.toString() + " probe patch");
-                        }
-                    }
-                    // routeRemote.next = (short) l.remotePort;
-                    // routeRemote.dist = (short) distance;
-                    
-                    startProbing();
+                    int dist = l.recvLoss * 100 / l.recvCount;
+                    printMessage("Received probe message from " + l.remotePort  + 
+                                " to " + localPort + " " + dist);
+                    Route rProbe = new Route((short) l.remotePort,(short) dist,
+                                            (short) l.remotePort, localPort, 'x');
+                    //adding probe route to externalRoute map for processing 
+                    //routeMap.get(localPort).addExternalRoute(rProbe);
+                    localRoute.addExternalRoute(rProbe);
+                    calcRoutes();
                     break;
 
                 case 'r':
-                    printMessage("Message received at Node " + localPort + 
+                    printMessage("Route received at Node " + localPort + 
                                 " from Node " + l.remotePort);
                     //rRemote is origin of routing table
                     Route rRemote = routeMap.get((short)(l.remotePort));
-                    //figuring out if the remote router has a better route to us(current node)
-                    for (int i = 1; i < len; i+=8){
-                        Route rTemp = new Route(b, i);
-                        if (rTemp.dest == localPort && rTemp.dist < rRemote.dist){
-                            rRemote = rTemp;
-                            rRemote.next = (short) l.remotePort; 
-                            break;
-                        } 
-                    }
+                    //figuring out if the remote router has a better route to our node)
+                    
                     if (rRemote == null){
                         break;
                     }
+                    //adding external routing table to node routing table 
                     for (int i = 1; i < len; i+=8){
                         Route r = new Route(b, i);
-                        //distance to remote port
-                        Route rLocal = routeMap.get(r.dest);
-                        //printMessage("Route: " + r.toString());
-                        if (rLocal != null && r.dest == rLocal.dest && rLocal.next == l.remotePort){
-                            rLocal.dist = (short) (r.dist + rRemote.dist);
-                            rLocal.nextDist = rRemote.dist;
-                            printMessage(localPort + rLocal.toString() + " increase route");
-                            hasChanged = true;
-                        } 
-                        else if (r.dest == localPort){
-                            rLocal = routeMap.get((short) l.remotePort);
-                            //checking if we have indirect route from incoming node probe
-                            if (rLocal.dest == rLocal.next && r.dist < rLocal.dist){
-                                //rLocal.next = r.next;
-                                rLocal.dist = r.dist;
-                                printMessage(localPort + rLocal.toString() + " reverse");
-                                hasChanged = true;
-                            }
-                            else{
-                                continue;
-                            }      
-                        }
-                        else if (r.next == localPort){
-                            continue;
-                        }
-                        else if (rLocal == null){
-                            rLocal = new Route(r.dest, (short) (r.dist + rRemote.dist), 
-                                    rRemote.next, (short) localPort, rRemote.dist, 'x');
-                            addRoute(r.dest, rLocal);
-                            printMessage(localPort + rLocal.toString() + " new");
-                            hasChanged = true;
-                        }
-                        else if(rLocal.dist > r.dist + rRemote.dist){
-                            rLocal.dest = r.dest; 
-                            //rLocal.next = (short) l.remotePort;
-                            rLocal.next = rRemote.next;
-                            rLocal.dist = (short) (r.dist + rRemote.dist);
-                            rLocal.nextDist = rRemote.dist;
-                            hasChanged = true;
-                            printMessage(localPort + rLocal.toString() + " change");
+                        rRemote.addExternalRoute(r);
+
+                        //if route does not exist, we add the route w/ distance 
+                        //infinity to enable calcRoutes to update it
+                        if (routeMap.get(r.dest) == null){
+                            routeMap.put(r.dest, new Route(r.dest, infinity,
+                                                    r.dest, (short) localPort, 'x'));
                         }
                     }
+                    calcRoutes();
                     break;
             }
             if (hasChanged){
-                sendRoutes();
+                if (!probing){
+                    sendRoutes();
+                }
                 startProbing();
                 printRouter();
             }
@@ -148,13 +155,9 @@ public class Router extends SR {
         catch(Exception e){
             printError(e.getMessage());
         }
-        // finally{
-        //     l.recvLoss = 0;
-        //     l.recvCount = 0; 
-
-        // }
     }   
     
+    //converts routing table to string
     public String toString(){
         String outStr; 
         //Timestamp added via SR.printmessage
@@ -166,6 +169,7 @@ public class Router extends SR {
         return outStr;
     }
 
+    //converts to bytes
     private byte[] toBytes(){
         byte[] bytes = new byte[routeMap.size() * 8 + 1];
         bytes[0] = 'r';
@@ -177,23 +181,26 @@ public class Router extends SR {
         return bytes;
     }
 
+    //prints router 
     public void printRouter(){
         printMessage(toString());
     }
 
-    public void printPacket(Packet p, String leading, String trailing){
-        //super.printPacket(p, leading, trailing);
-    }
+    //overrides printPacket from SRNode
+    public void printPacket(Packet p, String leading, String trailing){}
     
+    //overriding sendMessageDone from SRNode
     public void sendMessageDone(Link l){}
 
+    //starts probing 
     public void startProbing(){
-        if (probe == null){
+        if (probe == null && probing){
             probe = new Probe();
             probe.start();
         }
     }
 
+    //probe sending thread 
     class Probe extends Thread{
 
         public void run(){
@@ -201,21 +208,25 @@ public class Router extends SR {
             long millis = System.currentTimeMillis();
         
             try{
+
                 while (running){
+                    //send routing tables every 5 seconds
+                    if (hasChanged && System.currentTimeMillis() - millis > 5000){
+                        sendRoutes();
+                        millis = System.currentTimeMillis();
+                    }
+                    //else{ 
                     for (Map.Entry<Short, Route> entry:routeMap.entrySet()){
                         Route r = entry.getValue();
 
                         if (r.mode == 's'){
-                            sendMessage("probe test from " + localPort + " to " + r.dest, r.dest, addr);
+                            sendMessage("probe test from " + localPort + 
+                                        " to " + r.dest, r.dest, addr);
+                            //sleepMs(10);
                         }                            
                     }
-                    sleepMs(100);
-
-                    //send updated routing tables every 5 seconds
-                    if (System.currentTimeMillis() - millis > 5000){
-                        sendRoutes();
-                        millis = System.currentTimeMillis();
-                    }
+                    //}
+                    sleepMs(250);
                 }
             }
             catch (Exception e){

@@ -17,20 +17,13 @@ public class SRNode {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Hello, World it's SR Node");
-        // if (args.length != 4){
-        //     SR.printMessage("Too few arguments. To start SRNode do " + 
-        //     "the following: <self-port> <peer-port> <window-size> " +
-        //     "[ -d <value-of-n> | -p <value-of-p>]");
-        // }
         argParse(args);
-
         Scanner input = new Scanner(System.in);
 
         while (running){
 
             String s = input.nextLine().trim();
             String[] newArgs = s.split(" ");
-
 
             switch (newArgs[0]){
 
@@ -39,6 +32,8 @@ public class SRNode {
                     node.sendMessage(s, remotePort, addr); 
                     break;
 
+                //sendtest #x allows user to send a large number of packets by dynamically creating #xyz character string to send 
+                //ie sendtest 1000 would send 1000 packets (with no ack failures) 
                 case "sendtest":
                     node.noDropACK = true;
                     String outString = "";
@@ -70,13 +65,16 @@ public class SRNode {
 
             switch (args[3]) {
 
+                //deterministic packet dropping
                 case "-d":
                     dLoss = Integer.parseInt(args[4]);
                     break;
 
+                //probabilistic packet dropping
                 case "-p":
                     pLoss = (Math.round(Float.parseFloat(args[4]) * 100));
                     break;
+
                 default:
                     System.out.println(("Nothing given"));
             }
