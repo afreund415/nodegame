@@ -5,14 +5,21 @@ Programming Assignment #2
 
 
 Highlights: 
-1. Can test each program on a single instance using specialized commandline arguments. This is helfpul for analyzing DVNode and CNNode.
+    1. 3 main programs, building on one another starting with SRNode, run through 3 separate CLIs. 
+    2. Can test each program on a single instance using specialized commandline arguments. This is helfpul for analyzing DVNode and CNNode.
+    3. Leverages Mulithreading, HashMaps, ArrayLists, and native java packages for all handling
+
+Known issues: 
+    1. At times I have messy code when it comes to converting between ints and shorts. Apologies. 
+    2. 
 
 
 Installing the project:
-1. Download zip file 
-2. Run <make> in folder
+    1. Download zip file 
+    2. Run <make> in folder
 
-
+Running:
+    1. See separate readMes below on the programs: SRNode, DVNode, & CNNode
 
 
 SRNode readMe: 
@@ -28,6 +35,18 @@ SRNode readMe:
         1. Send <message>, where message is any list of characters that the program can split into packets
         2. sendtest <# of characters> this allows the user to run an emulation test where they send a message (with ACK failures turned off) of however many characters they want  
         3. ctrl+C exits the program
+
+    SRNode architecture:
+
+        SRNode: 
+
+        SR: 
+
+        Link: 
+
+        Packet: 
+
+
 
 
 
@@ -47,6 +66,21 @@ DVNode readMe:
         Commandline options DVNode: 
             1. <show> prints out routing table for easier viewing
             2. ctrl+C exits the program
+
+    DVNode architecture: 
+
+        DVNode: 
+
+        SR: 
+
+        Link: 
+
+        Packet: 
+
+        Route: 
+
+        Router:
+
 
 
 CNNode readMe: 
@@ -72,6 +106,21 @@ CNNode readMe:
         Commandline options CNNode: 
             1. <show> prints out routing table for easier viewing
             2. ctrl+C exits the program
+    
+    CNNode architecture: 
+        CNNode utilizes SR infrastructure to exchange routes in addition to the probing packages. However, these routes and probes are sent in one SR packet and are exempt from all loss probabilities and lost ACKs. 
+
+        CNNode: 
+
+        SR: 
+
+        Link: 
+
+        Packet: 
+
+        Route: 
+
+        Router:
         
     
 

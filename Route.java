@@ -6,11 +6,10 @@ Programming Assignment #2
 
 
 Route class creates a single route object between 2 nodes that 
-router nodes can use to updat their tables
+router nodes can use to update their tables
 */
 
-import java.util.HashMap;
-
+import java.util.*;
 
 public class Route {
 
@@ -55,14 +54,7 @@ public class Route {
         if (next != dest){
             outStr += "; Next hop —> Node " + next;
         }
-        //DEBUG Code
-        //outStr += " " + (char) mode;
-        // if (incomingRoutes != null){
-        //     for (Map.Entry<Short, Route> entry:incomingRoutes.entrySet()){
-        //         Route test = entry.getValue();
-        //         outStr += "\n                " + test.toString();
-        //     }
-        // }
+        
         return outStr; 
     }
 

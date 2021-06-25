@@ -1,9 +1,11 @@
-
 /* 
 Andreas Carlos Freund
 Acf2175
 CSEE-4119 Computer Networks
 Programming Assignment #2
+
+
+SRNode class is the CLI for the selective repeat program
 */
 
 import java.util.Scanner;
@@ -15,6 +17,7 @@ public class SRNode {
     static SR node;
     static String addr = "127.0.0.1"; 
 
+    //SRNode main
     public static void main(String[] args) throws Exception {
         System.out.println("Hello, World it's SR Node");
         argParse(args);
@@ -32,17 +35,17 @@ public class SRNode {
                     node.sendMessage(s, remotePort, addr); 
                     break;
 
-                //sendtest #x allows user to send a large number of packets by dynamically 
-                //creating #xyz character string to send 
-                //Ex: sendtest 1000 would send 1000 packets (with no ack failures) 
+                /*sendtest #x allows user to send a large number of packets 
+                by dynamically creating #xyz character string to send
+                ex: sendtest 1000 would send 1000 packets (w/ no ack fails) 
+                */
                 case "sendtest":
                     node.noDropACK = true;
                     String outString = "";
                     int charCount = Integer.parseInt(newArgs[1]);
 
                     for (int i = 0; i < charCount; i++){
-                        char c = (char) ((node.random.nextInt(97) & 0xff) + 32);
-                        
+                        char c = (char) ((node.random.nextInt(97) & 0xff) + 32); 
                         outString += c;
                     }
                     node.sendMessage(outString, remotePort, addr);
@@ -55,11 +58,12 @@ public class SRNode {
         input.close();
     }
 
+    //parses CL args
     private static void argParse(String[] args) {
 
         try {
-            int lPort = SR.validatePort(Integer.parseInt(args[0]));
-            remotePort = SR.validatePort(Integer.parseInt(args[1]));
+            int lPort = SR.checkPort(Integer.parseInt(args[0]));
+            remotePort = SR.checkPort(Integer.parseInt(args[1]));
             int windw = Integer.parseInt(args[2]);
             int dLoss = 0;
             int pLoss = 0;
@@ -77,7 +81,7 @@ public class SRNode {
                     break;
 
                 default:
-                    System.out.println(("Nothing given"));
+                    System.out.println(("No probs given"));
             }
             node = new SR(lPort, windw, dLoss, pLoss);
             running = true; 
@@ -88,7 +92,7 @@ public class SRNode {
         }
         catch (Exception e) {
             //SR.printError(e.getMessage());
-            SR.printMessage("Too few arguments. To start SRNode do " + 
+            SR.printMessage("Too few arguments. To start SRNode enter " + 
             "the following: <self-port> <peer-port> <window-size> " +
             "[ -d <value-of-n> | -p <value-of-p>]");
         }

@@ -1,4 +1,3 @@
-
 /* 
 Andreas Carlos Freund
 Acf2175
@@ -8,7 +7,6 @@ Programming Assignment #2
 
 SR class handles all selective repeat logic
 */
-
 
 import java.net.*;
 import java.util.*;
@@ -23,6 +21,7 @@ public class SR{
     int dLoss; 
     Receive receive; 
     SendHelper sendHelper;
+    //generates
     public Random random = new Random();
     int deterCount = 0;
     DatagramSocket ds;
@@ -31,15 +30,19 @@ public class SR{
     boolean noDropACK = false;
     static boolean debug = false;
     static final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-    final static byte STATUS_MSG = 0x01; 
-    final static byte STATUS_EOM = 0x02; 
-    final static byte STATUS_ACK = 0x04; 
-    //constant for checking ACK
-    final static byte STATUS_MOK = 0x08; 
-    final static byte STATUS_IGN = 0x10; 
+    //Msg constant
+    static final byte STATUS_MSG = 0x01; 
+    //End-of-msg constant
+    static final byte STATUS_EOM = 0x02; 
+    //ACK msg constant
+    static final byte STATUS_ACK = 0x04; 
+    //ACKed msg constant
+    static final byte STATUS_MOK = 0x08; 
+    //Ignore constant
+    static final byte STATUS_IGN = 0x10; 
 
 
-
+    //SR constructor 
     public SR(int lPort, int windw, int dLoss, int pLoss) throws Exception{
 
         this.localPort = lPort;
@@ -56,6 +59,7 @@ public class SR{
         sendHelper.start();
     }
 
+    //returns link for a remote port
     public Link getLink(int remotePort){
         Link l = links.get(remotePort);
 
@@ -66,11 +70,13 @@ public class SR{
         return l;
     }
 
+    //string message handler
     public void sendMessage(String msg, int remotePort, String addr) throws Exception{
         Send send = new Send(msg.getBytes(), msg.length(), remotePort, addr, false);
         send.l.sendQueue.add(send);
     }
 
+    //byte message handler
     public void sendMessage(byte[] msg, int remotePort, String addr) throws Exception{
         Send send = new Send(msg, msg.length, remotePort, addr, true);
         send.l.sendQueue.add(send);
@@ -82,6 +88,7 @@ public class SR{
         return l.sendQueue.size() < max; 
     }
 
+    //UDP datagram sender
     public void sendDatagram(Packet p, int remotePort, String addr) throws Exception{
         InetAddress ip = InetAddress.getByName(addr);
         DatagramPacket dp = new DatagramPacket(p.toBytes(), 
@@ -89,6 +96,7 @@ public class SR{
         ds.send(dp);
     }
 
+    //handles drop packet logic 
     public boolean dropPacket(Packet p, Link l){
        
         if ((p.status & STATUS_IGN) !=0){
@@ -105,6 +113,7 @@ public class SR{
             return true;
         }
         deterCount ++;
+
         if (dLoss != 0 && ((deterCount % dLoss) == 0)){
             l.recvLoss++;
             return true;
@@ -182,7 +191,9 @@ public class SR{
                         for (int i = l.sBase; i < l.sNext; i++){
                             Packet p = l.sWindow[i % windw];
 
-                            if ((p != null) && (p.status & STATUS_MOK) == 0 && (millis - p.millis > 500)){
+                            if ((p != null) && (p.status & STATUS_MOK) == 0 && 
+                                    (millis - p.millis > 500)){
+                                
                                 p.millis = System.currentTimeMillis();
                                 sendDatagram(p, l.remotePort, l.addr);
                                 printPacket(p, "", "timeout, resending");
@@ -192,13 +203,16 @@ public class SR{
                         }
                         if (l.sending == null && l.sendQueue.size() > 0){
                             l.sending = l.sendQueue.get(0); 
+
                             if (l.sending != null){
+
                                 try{
                                     l.sending.start();
                                     l.sendQueue.remove(0);
                                 }
                                 catch(Exception e){
-                                    printError("Couldn't access sendQueue " + e.getMessage());
+                                    printError("Couldn't access sendQueue " + 
+                                                e.getMessage());
                                     l.sending = null; 
                                 }
                             }
@@ -219,7 +233,7 @@ public class SR{
         public void run(){
             //debug statement
             printMessage("Receive Thread started " + localPort);
-            //set max # of bytes receiver can receive
+            //set max # of bytes receiver can handle
             byte[] buf = new byte[1024]; 
             
             while(running){
@@ -263,7 +277,7 @@ public class SR{
 
                                 if (pRecv != null && pRecv.seq == i){
 
-                                    //get rid of data that exceeds internal buffer length 
+                                    //discard data that exceeds internal buffer length 
                                     if (l.recvIndex + p.length() <= l.recvData.length){
                                         l.recvIndex += pRecv.copy(l.recvData, l.recvIndex);
                                     }       
@@ -350,6 +364,15 @@ public class SR{
         }
     }
 
+    //ensures port #s are between 
+    public static int checkPort(int port) throws Exception{
+        if (port > 0xffff && port < 1024){
+            throw (new IndexOutOfBoundsException("Por needs to be greater " +
+                                "than 1024 and less than 65535"));
+        }
+        return port; 
+    }
+
     //prints messages
     public static void printMessage(String s){
         Date date = new Date();
@@ -365,13 +388,5 @@ public class SR{
         String out; 
         out = " "  + leading + (p==null?"":p.toString()) + " " + trailing;         
         printMessage(out);
-    }
-
-    public static int validatePort(int port) throws Exception{
-        if (port > 0xffff && port < 1024){
-            throw (new IndexOutOfBoundsException("Por needs to be greater " +
-                                "than 1024 and less than 65535"));
-        }
-        return port; 
     }
 }

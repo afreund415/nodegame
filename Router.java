@@ -8,9 +8,7 @@ Programming Assignment #2
 Router (with an R) class includes individual router node behavior and network logic
 */
 
-
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Router extends SR {
 
@@ -235,7 +233,8 @@ public class Router extends SR {
                                 if (System.currentTimeMillis() - sendMillis > 1000){
                                     Link l = getLink(r.dest);
                                     printMessage("Link from " + localPort + " to " + l.remotePort + ": " + 
-                                    l.sendCount + " packets sent, " + l.sendLoss + " packets lost, loss rate " + 
+                                                    l.sendCount + " packets sent, " + l.sendLoss + 
+                                                    " packets lost, loss rate " + 
                                     (l.sendLoss * 100 / l.sendCount) + "%");
                                     sendMillis = System.currentTimeMillis();
                                 }

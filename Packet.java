@@ -1,14 +1,15 @@
-import java.util.Arrays;
-
 /* 
 Andreas Carlos Freund
 Acf2175
 CSEE-4119 Computer Networks
 Programming Assignment #2
 
+
 Packet class represents a single packet that is sent or received over the wire
-Each packet has its data, a sequence number, and a status flag 
+Each packet has data, a sequence number, and a status flag 
 */
+
+import java.util.Arrays;
 
 public class Packet {
 
@@ -88,6 +89,4 @@ public class Packet {
         bytes[2+start] = (byte) (value >> 8); 
         bytes[3 + start] = (byte) (value);
     }
-
-
 }

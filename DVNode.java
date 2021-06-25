@@ -1,22 +1,23 @@
-
 /* 
 Andreas Carlos Freund
 Acf2175
 CSEE-4119 Computer Networks
 Programming Assignment #2
+
+
+DVNode class is the CLI for the distance vector program
 */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Scanner;
 
-
 public class DVNode {
+
     static Boolean running = false;
     static String addr = "127.0.0.1"; 
     static HashMap<Short, Router> routers = new HashMap<Short, Router>();
 
-    //DVNode
+    //DVNode main
     public static void main(String[] args) throws Exception {
         System.out.println("DV Node started");
         argParse(args);
@@ -42,6 +43,7 @@ public class DVNode {
         input.close();
     }
 
+    //parses CL args
     private static void argParse(String[] args) {
       
         try { 
@@ -52,7 +54,7 @@ public class DVNode {
             do{
                 //getting local port #
                 if (args.length > pos){
-                    lPort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
+                    lPort = (short) SR.checkPort(Integer.parseInt(args[pos++]));
                     router = new Router(lPort);
                     routers.put(lPort, router);
                     running = true;
@@ -62,8 +64,10 @@ public class DVNode {
                     return;
                 }
                 //gets remote port and distance
-                while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  args[pos].charAt(0) <= '9'){
-                    short remotePort = (short) SR.validatePort(Integer.parseInt(args[pos++]));
+                while(args.length > pos + 1 && args[pos].charAt(0) >= '0' &&  
+                    args[pos].charAt(0) <= '9'){
+                    
+                    short remotePort = (short) SR.checkPort(Integer.parseInt(args[pos++]));
                     short dist = (short) (Math.round(Float.parseFloat(args[pos++]) * 100));
                     Route r = new Route(remotePort, dist, remotePort, lPort, 'd');
                     router.addRoute(remotePort, r);
