@@ -153,6 +153,7 @@ SRNode:
                 .....
                 ..... (Removed several lines for brevity)
                 ..... 
+                .....
                 14:08:16.194 Summary (Sender): 42/198 packets dropped, loss rate = 21%
                 14:08:16.704  packet 65 "e" timeout, resending
                 14:08:16.704  ACK 65 sent, window starts at 65
@@ -241,6 +242,7 @@ SRNode:
 
         User 1 (sender):
             java -cp "./" SRNode 4000 3000 10 -p .2
+
             sendtest 100
             14:19:07.868  packet 100 "2" sent
             14:19:07.868  packet 101 "z" sent
@@ -280,6 +282,7 @@ SRNode:
 
         User 2 (receiver):
             java -cp "./" SRNode 3000 4000 10 -p .2
+
             14:19:07.868  packet 100 "2" dropped
             14:19:07.868  packet 101 "z" dropped
             14:19:07.869  ACK 102 sent, window starts at 100
@@ -323,6 +326,7 @@ DVNode:
 
     1 instance: 
         java -cp "./" DVNode 1111 2222 .1 3333 .5 next 2222 1111 .1 3333 .2 4444 .8 next 3333 1111 .5 2222 .2 4444 .5 next 4444 2222 .8 3333 .5 last
+        
         DV Node started
         14:58:57.784 Receive Thread started 1111
         14:58:57.797  Node 1111 Routing table 
@@ -485,29 +489,1505 @@ DVNode:
         User 1111:
             java -cp "./" DVNode 1111 2222 .1 3333 .5
             
+            DV Node started
+            16:22:50.251 Receive Thread started 1111
+            16:22:50.262  Node 1111 Routing table 
+            - (0.50) —> Node 3333
+            - (0.00) —> Node 1111
+            - (0.10) —> Node 2222
+
+            16:23:23.410 Route received at Node 1111 from Node 3333
+            16:23:23.411 Route was sent from Node 1111 to Node 3333
+            16:23:23.411 Route was sent from Node 1111 to Node 2222
+            16:23:23.518  Node 1111 Routing table 
+            - (0.50) —> Node 3333
+            - (0.00) —> Node 1111
+            - (1.00) —> Node 4444; Next hop —> Node 3333
+            - (0.10) —> Node 2222
+
+            16:23:23.518 Route received at Node 1111 from Node 2222
+            16:23:23.518 Route was sent from Node 1111 to Node 3333
+            16:23:23.518 Route was sent from Node 1111 to Node 2222
+            16:23:23.624  Node 1111 Routing table 
+            - (0.30) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.90) —> Node 4444; Next hop —> Node 2222
+            - (0.10) —> Node 2222
+
+            16:23:23.626 Route received at Node 1111 from Node 3333
+            16:23:23.626 Route was sent from Node 1111 to Node 3333
+            16:23:23.627 Route was sent from Node 1111 to Node 2222
+            16:23:23.730  Node 1111 Routing table 
+            - (0.30) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.80) —> Node 4444; Next hop —> Node 3333
+            - (0.10) —> Node 2222
+
+            16:23:23.731 Route received at Node 1111 from Node 2222
+            show
+            16:23:29.168  Node 1111 Routing table 
+            - (0.30) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.80) —> Node 4444; Next hop —> Node 2222
+            - (0.10) —> Node 2222
 
         User 2222:
-            java -cp "./" DVNode
-            
+            java -cp "./" DVNode 2222 1111 .1 3333 .2 4444 .8 
+           
+            DV Node started
+            16:22:59.216 Receive Thread started 2222
+            16:22:59.230  Node 2222 Routing table 
+            - (0.20) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.80) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:23:23.364 Route received at Node 2222 from Node 4444
+            16:23:23.366 Route was sent from Node 2222 to Node 3333
+            16:23:23.366 Route was sent from Node 2222 to Node 1111
+            16:23:23.366 Route was sent from Node 2222 to Node 4444
+            16:23:23.468  Node 2222 Routing table 
+            - (0.20) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.80) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:23:23.469 Route received at Node 2222 from Node 3333
+            16:23:23.469 Route was sent from Node 2222 to Node 3333
+            16:23:23.469 Route was sent from Node 2222 to Node 1111
+            16:23:23.469 Route was sent from Node 2222 to Node 4444
+            16:23:23.576  Node 2222 Routing table 
+            - (0.20) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.70) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:23:23.576 Route received at Node 2222 from Node 1111
+            16:23:23.577 Route received at Node 2222 from Node 4444
+            16:23:23.577 Route received at Node 2222 from Node 3333
+            16:23:23.578 Route received at Node 2222 from Node 1111
+            16:23:23.578 Route received at Node 2222 from Node 4444
+            16:23:23.630 Route received at Node 2222 from Node 1111
+            16:23:23.662 Route received at Node 2222 from Node 4444
+            show
+            16:23:31.239  Node 2222 Routing table 
+            - (0.20) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.70) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
 
         User 3333:
-            java -cp "./" DVNode
+            java -cp "./" DVNode 3333 1111 .5 2222 .2 4444 .5
+            
+            DV Node started
+            16:23:04.267 Receive Thread started 3333
+            16:23:04.280  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.50) —> Node 1111
+            - (0.50) —> Node 4444
+            - (0.20) —> Node 2222
+
+            16:23:23.368 Route received at Node 3333 from Node 4444
+            16:23:23.369 Route was sent from Node 3333 to Node 1111
+            16:23:23.369 Route was sent from Node 3333 to Node 4444
+            16:23:23.369 Route was sent from Node 3333 to Node 2222
+            16:23:23.472  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.50) —> Node 1111
+            - (0.50) —> Node 4444
+            - (0.20) —> Node 2222
+
+            16:23:23.473 Route received at Node 3333 from Node 1111
+            16:23:23.473 Route received at Node 3333 from Node 2222
+            16:23:23.474 Route was sent from Node 3333 to Node 1111
+            16:23:23.474 Route was sent from Node 3333 to Node 4444
+            16:23:23.474 Route was sent from Node 3333 to Node 2222
+            16:23:23.578  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.30) —> Node 1111; Next hop —> Node 2222
+            - (0.50) —> Node 4444
+            - (0.20) —> Node 2222
+
+            16:23:23.579 Route received at Node 3333 from Node 4444
+            16:23:23.579 Route received at Node 3333 from Node 1111
+            16:23:23.579 Route received at Node 3333 from Node 2222
+            16:23:23.580 Route received at Node 3333 from Node 4444
+            16:23:23.630 Route received at Node 3333 from Node 1111
+            16:23:23.662 Route received at Node 3333 from Node 4444
+            show
+            16:23:34.333  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.30) —> Node 1111; Next hop —> Node 2222
+            - (0.50) —> Node 4444
+            - (0.20) —> Node 2222
 
         User 4444:
-            java -cp "./" DVNode
+            java -cp "./" DVNode 4444 2222 .8 3333 .5 last
+            
+            DV Node started
+            16:23:23.255 Receive Thread started 4444
+            16:23:23.268  Node 4444 Routing table 
+            - (0.50) —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.80) —> Node 2222
+
+            16:23:23.274 Route was sent from Node 4444 to Node 3333
+            16:23:23.274 Route was sent from Node 4444 to Node 2222
+            16:23:23.403 Route received at Node 4444 from Node 3333
+            16:23:23.404 Route was sent from Node 4444 to Node 3333
+            16:23:23.404 Route was sent from Node 4444 to Node 2222
+            16:23:23.509  Node 4444 Routing table 
+            - (0.50) —> Node 3333
+            - (1.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.70) —> Node 2222; Next hop —> Node 3333
+
+            16:23:23.509 Route received at Node 4444 from Node 2222
+            16:23:23.509 Route was sent from Node 4444 to Node 3333
+            16:23:23.510 Route was sent from Node 4444 to Node 2222
+            16:23:23.615  Node 4444 Routing table 
+            - (0.50) —> Node 3333
+            - (0.90) —> Node 1111; Next hop —> Node 2222
+            - (0.00) —> Node 4444
+            - (0.70) —> Node 2222; Next hop —> Node 3333
+
+            16:23:23.615 Route received at Node 4444 from Node 3333
+            16:23:23.616 Route was sent from Node 4444 to Node 3333
+            16:23:23.616 Route was sent from Node 4444 to Node 2222
+            16:23:23.722  Node 4444 Routing table 
+            - (0.50) —> Node 3333
+            - (0.80) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.70) —> Node 2222; Next hop —> Node 3333
+
+            16:23:23.722 Route received at Node 4444 from Node 2222
+            show
+            16:23:26.716  Node 4444 Routing table 
+            - (0.50) —> Node 3333
+            - (0.80) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.70) —> Node 2222; Next hop —> Node 3333
+
+
+
 
 
 CNNnode:
 
     1 instance: 
 
+        java -cp "./" CNNode 1111 receive send 2222 3333 next 2222 receive 1111 .1 send 3333 4444 next 3333 receive 1111 .5 2222 .2 send 4444 next 4444 receive 2222 .8 3333 .5 send last
+        
+        CNNode started
+        16:27:59.487 Receive Thread started 1111
+        16:27:59.499  Node 1111 Routing table 
+        - (1.00) —> Node 3333
+        - (0.00) —> Node 1111
+        - (1.00) —> Node 2222
+
+        16:27:59.500 Receive Thread started 2222
+        16:27:59.502  Node 2222 Routing table 
+        - (1.00) —> Node 3333
+        - (1.00) —> Node 1111
+        - (1.00) —> Node 4444
+        - (0.00) —> Node 2222
+
+        16:27:59.503 Receive Thread started 3333
+        16:27:59.503  Node 3333 Routing table 
+        - (0.00) —> Node 3333
+        - (1.00) —> Node 1111
+        - (1.00) —> Node 4444
+        - (1.00) —> Node 2222
+
+        16:27:59.504 Receive Thread started 4444
+        16:27:59.504  Node 4444 Routing table 
+        - (1.00) —> Node 3333
+        - (0.00) —> Node 4444
+        - (1.00) —> Node 2222
+
+        16:27:59.508 Route was sent from Node 4444 to Node 3333
+        16:27:59.508 Route was sent from Node 4444 to Node 2222
+        16:27:59.610 Route received at Node 3333 from Node 4444
+        16:27:59.610 Route received at Node 2222 from Node 4444
+        16:27:59.612 Probe thread running 3333
+        16:27:59.612 Probe thread running 2222
+        16:27:59.612 Route was sent from Node 2222 to Node 3333
+        .....
+        .....
+        ..... (Removed several lines for brevity)
+        ..... 
+        .....
+        6:28:29.927 Link from 3333 to 4444: 227 packets sent, 113 packets lost, loss rate 49%
+
+        16:28:29.927 Link from 2222 to 3333: 355 packets sent, 74 packets lost, loss rate 20%
+        16:28:29.956 Received probe message from 3333 to 4444
+        16:28:29.956  Node 4444 Routing table 
+        - (0.51) —> Node 3333
+        - (0.85) —> Node 1111; Next hop —> Node 3333
+        - (0.00) —> Node 4444
+        - (0.72) —> Node 2222; Next hop —> Node 3333
+
+        16:28:30.032 Link from 1111 to 3333: 242 packets sent, 118 packets lost, loss rate 48%
+        16:28:30.375 Route was sent from Node 4444 to Node 3333
+        16:28:30.375 Route was sent from Node 4444 to Node 2222
+        16:28:30.431 Route was sent from Node 3333 to Node 1111
+        16:28:30.431 Route was sent from Node 3333 to Node 4444
+        16:28:30.431 Route was sent from Node 2222 to Node 3333
+        16:28:30.431 Route was sent from Node 3333 to Node 2222
+        16:28:30.431 Route was sent from Node 2222 to Node 1111
+        16:28:30.441 Route received at Node 3333 from Node 4444
+        16:28:30.442  Node 3333 Routing table 
+        - (0.00) —> Node 3333
+        - (0.32) —> Node 1111; Next hop —> Node 2222
+        - (0.51) —> Node 4444
+        - (0.21) —> Node 2222
+
+        16:28:30.442 Route received at Node 2222 from Node 4444
+        16:28:30.442  Node 2222 Routing table 
+        - (0.20) —> Node 3333
+        - (0.11) —> Node 1111
+        - (0.71) —> Node 4444; Next hop —> Node 3333
+        - (0.00) —> Node 2222
+
+        16:28:30.468 Route received at Node 1111 from Node 3333
+        16:28:30.468 Route received at Node 2222 from Node 3333
+        16:28:30.469  Node 2222 Routing table 
+        - (0.21) —> Node 3333
+        - (0.11) —> Node 1111
+        - (0.72) —> Node 4444; Next hop —> Node 3333
+        - (0.00) —> Node 2222
+
+        16:28:30.469  Node 1111 Routing table 
+        - (0.31) —> Node 3333; Next hop —> Node 2222
+        - (0.00) —> Node 1111
+        - (0.83) —> Node 4444; Next hop —> Node 2222
+        - (0.11) —> Node 2222
+
+        16:28:30.470 Route received at Node 1111 from Node 2222
+        16:28:30.470  Node 1111 Routing table 
+        - (0.31) —> Node 3333; Next hop —> Node 2222
+        - (0.00) —> Node 1111
+        - (0.82) —> Node 4444; Next hop —> Node 2222
+        - (0.11) —> Node 2222
+
+        16:28:30.535 Route was sent from Node 1111 to Node 3333
+        16:28:30.536 Route was sent from Node 1111 to Node 2222
+        16:28:31.040 Link from 3333 to 4444: 242 packets sent, 118 packets lost, loss rate 48%
+        16:28:31.040 Link from 2222 to 3333: 366 packets sent, 77 packets lost, loss rate 21%
+        16:28:31.060 Received probe message from 1111 to 2222
+        16:28:31.061  Node 2222 Routing table 
+        - (0.21) —> Node 3333
+        - (0.11) —> Node 1111
+        - (0.72) —> Node 4444; Next hop —> Node 3333
+        - (0.00) —> Node 2222
+
+        16:28:31.088 Received probe message from 2222 to 3333
+        16:28:31.089  Node 3333 Routing table 
+        - (0.00) —> Node 3333
+        - (0.32) —> Node 1111; Next hop —> Node 2222
+        - (0.51) —> Node 4444
+        - (0.21) —> Node 2222
+
+
 
     4 instances: 
         User 1111:
+             java -cp "./" CNNode 1111 receive send 2222 3333
+            
+            CNNode started
+            16:37:28.173 Receive Thread started 1111
+            16:37:28.184  Node 1111 Routing table 
+            - (1.00) —> Node 3333
+            - (0.00) —> Node 1111
+            - (1.00) —> Node 2222
+
+            16:38:04.768 Route received at Node 1111 from Node 3333
+            16:38:04.771  Node 1111 Routing table 
+            - (1.00) —> Node 3333
+            - (0.00) —> Node 1111
+            - (2.00) —> Node 4444; Next hop —> Node 3333
+            - (1.00) —> Node 2222
+
+            16:38:04.772 Probe thread running 1111
+            16:38:04.773 Route was sent from Node 1111 to Node 3333
+            16:38:04.773 Route was sent from Node 1111 to Node 2222
+            16:38:04.775 Route received at Node 1111 from Node 2222
+            16:38:04.776  Node 1111 Routing table 
+            - (1.00) —> Node 3333
+            - (0.00) —> Node 1111
+            - (2.00) —> Node 4444; Next hop —> Node 3333
+            - (1.00) —> Node 2222
+
+            16:38:05.390 Link from 1111 to 3333: 1 packets sent, 0 packets lost, loss rate 0%
+            16:38:06.397 Link from 1111 to 3333: 18 packets sent, 5 packets lost, loss rate 27%
+            16:38:07.406 Link from 1111 to 3333: 22 packets sent, 8 packets lost, loss rate 36%
+            16:38:08.413 Link from 1111 to 3333: 32 packets sent, 11 packets lost, loss rate 34%
+            16:38:09.422 Link from 1111 to 3333: 40 packets sent, 15 packets lost, loss rate 37%
+            16:38:09.927 Route was sent from Node 1111 to Node 3333
+            16:38:09.927 Route was sent from Node 1111 to Node 2222
+            16:38:09.937 Route received at Node 1111 from Node 2222
+            16:38:09.938  Node 1111 Routing table 
+            - (1.00) —> Node 3333
+            - (0.00) —> Node 1111
+            - (1.08) —> Node 4444; Next hop —> Node 2222
+            - (0.08) —> Node 2222
+
+            16:38:09.939 Route received at Node 1111 from Node 3333
+            16:38:09.940  Node 1111 Routing table 
+            - (0.39) —> Node 3333
+            - (0.00) —> Node 1111
+            - (1.08) —> Node 4444; Next hop —> Node 2222
+            - (0.08) —> Node 2222
+
+            16:38:10.535 Link from 1111 to 3333: 48 packets sent, 20 packets lost, loss rate 41%
+            16:38:11.539 Link from 1111 to 3333: 57 packets sent, 22 packets lost, loss rate 38%
+            16:38:12.546 Link from 1111 to 3333: 65 packets sent, 24 packets lost, loss rate 36%
+            16:38:13.552 Link from 1111 to 3333: 72 packets sent, 31 packets lost, loss rate 43%
+            16:38:14.560 Link from 1111 to 3333: 80 packets sent, 34 packets lost, loss rate 42%
+            16:38:15.000 Route received at Node 1111 from Node 3333
+            16:38:15.001  Node 1111 Routing table 
+            - (0.41) —> Node 3333
+            - (0.00) —> Node 1111
+            - (0.66) —> Node 4444; Next hop —> Node 3333
+            - (0.08) —> Node 2222
+
+            16:38:15.062 Route was sent from Node 1111 to Node 3333
+            16:38:15.062 Route was sent from Node 1111 to Node 2222
+            16:38:15.089 Route received at Node 1111 from Node 2222
+            16:38:15.091  Node 1111 Routing table 
+            - (0.25) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.66) —> Node 4444; Next hop —> Node 3333
+            - (0.07) —> Node 2222
+
+            16:38:15.676 Link from 1111 to 3333: 91 packets sent, 42 packets lost, loss rate 46%
+            16:38:16.685 Link from 1111 to 3333: 95 packets sent, 46 packets lost, loss rate 48%
+            16:38:17.689 Link from 1111 to 3333: 104 packets sent, 50 packets lost, loss rate 48%
+            16:38:18.696 Link from 1111 to 3333: 109 packets sent, 54 packets lost, loss rate 49%
+            16:38:19.702 Link from 1111 to 3333: 113 packets sent, 56 packets lost, loss rate 49%
+            16:38:20.151 Route received at Node 1111 from Node 3333
+            16:38:20.152  Node 1111 Routing table 
+            - (0.25) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.62) —> Node 4444; Next hop —> Node 3333
+            - (0.07) —> Node 2222
+
+            16:38:20.204 Route was sent from Node 1111 to Node 3333
+            16:38:20.204 Route was sent from Node 1111 to Node 2222
+            16:38:20.233 Route received at Node 1111 from Node 2222
+            16:38:20.234  Node 1111 Routing table 
+            - (0.21) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.46) —> Node 4444; Next hop —> Node 2222
+            - (0.08) —> Node 2222
+
+            16:38:20.809 Link from 1111 to 3333: 120 packets sent, 60 packets lost, loss rate 50%
+            16:38:21.818 Link from 1111 to 3333: 129 packets sent, 63 packets lost, loss rate 48%
+            16:38:22.825 Link from 1111 to 3333: 138 packets sent, 68 packets lost, loss rate 49%
+            16:38:23.831 Link from 1111 to 3333: 142 packets sent, 72 packets lost, loss rate 50%
+            16:38:24.837 Link from 1111 to 3333: 150 packets sent, 76 packets lost, loss rate 50%
+            16:38:25.291 Route received at Node 1111 from Node 2222
+            16:38:25.292  Node 1111 Routing table 
+            - (0.21) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.58) —> Node 4444; Next hop —> Node 2222
+            - (0.07) —> Node 2222
+
+            16:38:25.304 Route received at Node 1111 from Node 3333
+            16:38:25.305  Node 1111 Routing table 
+            - (0.21) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.58) —> Node 4444; Next hop —> Node 2222
+            - (0.07) —> Node 2222
+
+            16:38:25.339 Route was sent from Node 1111 to Node 3333
+            16:38:25.340 Route was sent from Node 1111 to Node 2222
+            16:38:25.943 Link from 1111 to 3333: 154 packets sent, 80 packets lost, loss rate 51%
+            16:38:26.951 Link from 1111 to 3333: 160 packets sent, 83 packets lost, loss rate 51%
+            16:38:27.955 Link from 1111 to 3333: 174 packets sent, 84 packets lost, loss rate 48%
+            16:38:28.961 Link from 1111 to 3333: 184 packets sent, 91 packets lost, loss rate 49%
+            16:38:29.970 Link from 1111 to 3333: 189 packets sent, 96 packets lost, loss rate 50%
+            16:38:30.458 Route received at Node 1111 from Node 2222
+            16:38:30.458  Node 1111 Routing table 
+            - (0.20) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.60) —> Node 4444; Next hop —> Node 2222
+            - (0.07) —> Node 2222
+
+            16:38:30.476 Route was sent from Node 1111 to Node 3333
+            16:38:30.476 Route was sent from Node 1111 to Node 2222
+            16:38:30.486 Route received at Node 1111 from Node 3333
+            16:38:30.487  Node 1111 Routing table 
+            - (0.20) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.60) —> Node 4444; Next hop —> Node 2222
+            - (0.07) —> Node 2222
+
+            16:38:31.077 Link from 1111 to 3333: 191 packets sent, 98 packets lost, loss rate 51%
+            16:38:32.087 Link from 1111 to 3333: 204 packets sent, 101 packets lost, loss rate 49%
+            16:38:33.093 Link from 1111 to 3333: 214 packets sent, 103 packets lost, loss rate 48%
+            16:38:34.097 Link from 1111 to 3333: 226 packets sent, 108 packets lost, loss rate 47%
+            16:38:35.106 Link from 1111 to 3333: 235 packets sent, 113 packets lost, loss rate 48%
+            16:38:35.605 Route received at Node 1111 from Node 2222
+            16:38:35.606  Node 1111 Routing table 
+            - (0.20) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.58) —> Node 4444; Next hop —> Node 2222
+            - (0.07) —> Node 2222
+
+            16:38:35.607 Route was sent from Node 1111 to Node 3333
+            16:38:35.607 Route was sent from Node 1111 to Node 2222
+            16:38:35.647 Route received at Node 1111 from Node 3333
+            16:38:35.648  Node 1111 Routing table 
+            - (0.20) —> Node 3333; Next hop —> Node 2222
+            - (0.00) —> Node 1111
+            - (0.57) —> Node 4444; Next hop —> Node 3333
+            - (0.07) —> Node 2222
+
+            16:38:36.215 Link from 1111 to 3333: 245 packets sent, 119 packets lost, loss rate 48%
+            16:38:37.219 Link from 1111 to 3333: 254 packets sent, 125 packets lost, loss rate 49%
+            16:38:38.228 Link from 1111 to 3333: 258 packets sent, 129 packets lost, loss rate 50%
+            16:38:39.235 Link from 1111 to 3333: 268 packets sent, 134 packets lost, loss rate 50%
+            16:38:40.245 Link from 1111 to 3333: 278 packets sent, 144 packets lost, loss rate 51%
+            16:38:40.748 Route was sent from Node 1111 to Node 3333
+            16:38:40.749 Route was sent from Node 1111 to Node 2222
+            16:38:41.358 Link from 1111 to 3333: 288 packets sent, 154 packets lost, loss rate 53%
+            16:38:42.366 Link from 1111 to 3333: 298 packets sent, 164 packets lost, loss rate 55%
+            ^C%                                                                             
 
         User 2222:
+            java -cp "./" CNNode 2222 receive 1111 .1 send 3333 4444
+
+            CNNode started
+            16:37:36.024 Receive Thread started 2222
+            16:37:36.036  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:04.698 Route received at Node 2222 from Node 4444
+            16:38:04.702 Probe thread running 2222
+            16:38:04.703  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:04.704 Route was sent from Node 2222 to Node 3333
+            16:38:04.704 Route was sent from Node 2222 to Node 1111
+            16:38:04.704 Route was sent from Node 2222 to Node 4444
+            16:38:04.763 Route received at Node 2222 from Node 3333
+            16:38:04.764  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:04.792 Route received at Node 2222 from Node 4444
+            16:38:04.793  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:04.848 Route received at Node 2222 from Node 1111
+            16:38:04.850  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:05.329 Link from 2222 to 3333: 1 packets sent, 0 packets lost, loss rate 0%
+            16:38:06.181 Received probe message from 1111 to 2222
+            16:38:06.182  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (0.11) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:06.339 Link from 2222 to 3333: 21 packets sent, 0 packets lost, loss rate 0%
+            16:38:07.346 Link from 2222 to 3333: 32 packets sent, 3 packets lost, loss rate 9%
+            16:38:07.520 Received probe message from 1111 to 2222
+            16:38:07.522  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (0.14) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:08.145 Received probe message from 1111 to 2222
+            16:38:08.146  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (0.11) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:08.355 Link from 2222 to 3333: 34 packets sent, 5 packets lost, loss rate 14%
+            16:38:08.871 Received probe message from 1111 to 2222
+            16:38:08.871  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (0.10) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:09.178 Received probe message from 1111 to 2222
+            16:38:09.179  Node 2222 Routing table 
+            - (1.00) —> Node 3333
+            - (0.08) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:09.359 Link from 2222 to 3333: 43 packets sent, 7 packets lost, loss rate 16%
+            16:38:09.860 Route was sent from Node 2222 to Node 3333
+            16:38:09.861 Route was sent from Node 2222 to Node 1111
+            16:38:09.861 Route was sent from Node 2222 to Node 4444
+            16:38:09.937 Route received at Node 2222 from Node 3333
+            16:38:09.939  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.08) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:09.948 Route received at Node 2222 from Node 4444
+            16:38:09.949  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.08) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:10.010 Received probe message from 1111 to 2222
+            16:38:10.012  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.08) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:10.466 Link from 2222 to 3333: 63 packets sent, 8 packets lost, loss rate 12%
+            16:38:10.734 Received probe message from 1111 to 2222
+            16:38:10.735  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.07) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:11.042 Received probe message from 1111 to 2222
+            16:38:11.043  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.06) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:11.139 Route received at Node 2222 from Node 1111
+            16:38:11.140  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.06) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:11.454 Received probe message from 1111 to 2222
+            16:38:11.456  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.06) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:11.475 Link from 2222 to 3333: 81 packets sent, 12 packets lost, loss rate 14%
+            16:38:12.479 Link from 2222 to 3333: 90 packets sent, 14 packets lost, loss rate 15%
+            16:38:12.587 Received probe message from 1111 to 2222
+            16:38:12.587  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.07) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:13.415 Received probe message from 1111 to 2222
+            16:38:13.416  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.07) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:13.485 Link from 2222 to 3333: 115 packets sent, 16 packets lost, loss rate 13%
+            16:38:14.493 Link from 2222 to 3333: 129 packets sent, 17 packets lost, loss rate 13%
+            16:38:14.995 Route was sent from Node 2222 to Node 3333
+            16:38:14.995 Route was sent from Node 2222 to Node 1111
+            16:38:14.996 Route was sent from Node 2222 to Node 4444
+            16:38:14.998 Route received at Node 2222 from Node 4444
+            16:38:14.999  Node 2222 Routing table 
+            - (0.18) —> Node 3333
+            - (0.07) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:15.001 Route received at Node 2222 from Node 3333
+            16:38:15.002  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.38) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:15.277 Received probe message from 1111 to 2222
+            16:38:15.279  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.38) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:15.603 Link from 2222 to 3333: 147 packets sent, 19 packets lost, loss rate 12%
+            16:38:15.999 Received probe message from 1111 to 2222
+            16:38:16.000  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.38) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:16.610 Link from 2222 to 3333: 161 packets sent, 22 packets lost, loss rate 13%
+            16:38:17.343 Received probe message from 1111 to 2222
+            16:38:17.344  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.38) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:17.618 Link from 2222 to 3333: 168 packets sent, 23 packets lost, loss rate 13%
+            16:38:18.059 Received probe message from 1111 to 2222
+            16:38:18.061  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.10) —> Node 1111
+            - (0.38) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:18.070 Route received at Node 2222 from Node 1111
+            16:38:18.071  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.38) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:18.626 Link from 2222 to 3333: 190 packets sent, 27 packets lost, loss rate 14%
+            16:38:19.415 Received probe message from 1111 to 2222
+            16:38:19.415  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.38) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:19.635 Link from 2222 to 3333: 207 packets sent, 28 packets lost, loss rate 13%
+            16:38:20.136 Route was sent from Node 2222 to Node 3333
+            16:38:20.136 Route was sent from Node 2222 to Node 1111
+            16:38:20.151 Route received at Node 2222 from Node 3333
+            16:38:20.152  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:20.152 Route received at Node 2222 from Node 4444
+            16:38:20.153  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:20.741 Link from 2222 to 3333: 228 packets sent, 31 packets lost, loss rate 13%
+            16:38:21.265 Received probe message from 1111 to 2222
+            16:38:21.266  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:21.746 Link from 2222 to 3333: 243 packets sent, 34 packets lost, loss rate 13%
+            16:38:21.988 Received probe message from 1111 to 2222
+            16:38:21.988  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:22.752 Link from 2222 to 3333: 266 packets sent, 36 packets lost, loss rate 13%
+            16:38:23.229 Received probe message from 1111 to 2222
+            16:38:23.230  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:23.754 Link from 2222 to 3333: 275 packets sent, 38 packets lost, loss rate 13%
+            16:38:23.955 Received probe message from 1111 to 2222
+            16:38:23.957  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.08) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:24.049 Route received at Node 2222 from Node 1111
+            16:38:24.049  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:24.761 Link from 2222 to 3333: 277 packets sent, 40 packets lost, loss rate 14%
+            16:38:24.868 Received probe message from 1111 to 2222
+            16:38:24.869  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:25.264 Route was sent from Node 2222 to Node 3333
+            16:38:25.264 Route was sent from Node 2222 to Node 1111
+            16:38:25.265 Route was sent from Node 2222 to Node 4444
+            16:38:25.305 Route received at Node 2222 from Node 4444
+            16:38:25.306  Node 2222 Routing table 
+            - (0.14) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:25.307 Route received at Node 2222 from Node 3333
+            16:38:25.307  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:25.688 Received probe message from 1111 to 2222
+            16:38:25.689  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:25.870 Link from 2222 to 3333: 287 packets sent, 42 packets lost, loss rate 14%
+            16:38:26.878 Link from 2222 to 3333: 300 packets sent, 46 packets lost, loss rate 15%
+            16:38:26.914 Received probe message from 1111 to 2222
+            16:38:26.916  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:27.226 Received probe message from 1111 to 2222
+            16:38:27.227  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:27.337 Route received at Node 2222 from Node 1111
+            16:38:27.338  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:27.638 Received probe message from 1111 to 2222
+            16:38:27.639  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:27.887 Link from 2222 to 3333: 310 packets sent, 48 packets lost, loss rate 15%
+            16:38:28.363 Received probe message from 1111 to 2222
+            16:38:28.364  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:28.894 Link from 2222 to 3333: 329 packets sent, 50 packets lost, loss rate 15%
+            16:38:29.190 Received probe message from 1111 to 2222
+            16:38:29.191  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:29.902 Link from 2222 to 3333: 337 packets sent, 51 packets lost, loss rate 15%
+            16:38:30.407 Route was sent from Node 2222 to Node 3333
+            16:38:30.408 Route was sent from Node 2222 to Node 1111
+            16:38:30.427 Received probe message from 1111 to 2222
+            16:38:30.428  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:30.464 Route received at Node 2222 from Node 4444
+            16:38:30.465  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:30.487 Route received at Node 2222 from Node 3333
+            16:38:30.487  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:31.013 Link from 2222 to 3333: 351 packets sent, 55 packets lost, loss rate 15%
+            16:38:31.760 Received probe message from 1111 to 2222
+            16:38:31.761  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:32.023 Link from 2222 to 3333: 362 packets sent, 58 packets lost, loss rate 16%
+            16:38:33.005 Received probe message from 1111 to 2222
+            16:38:33.006  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:33.027 Link from 2222 to 3333: 377 packets sent, 60 packets lost, loss rate 15%
+            16:38:33.727 Received probe message from 1111 to 2222
+            16:38:33.728  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:33.830 Route received at Node 2222 from Node 1111
+            16:38:33.831  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:34.037 Link from 2222 to 3333: 382 packets sent, 65 packets lost, loss rate 17%
+            16:38:34.139 Received probe message from 1111 to 2222
+            16:38:34.140  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:34.964 Received probe message from 1111 to 2222
+            16:38:34.965  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.51) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:35.045 Link from 2222 to 3333: 400 packets sent, 68 packets lost, loss rate 17%
+            16:38:35.548 Route was sent from Node 2222 to Node 3333
+            16:38:35.549 Route was sent from Node 2222 to Node 1111
+            16:38:35.594 Route received at Node 2222 from Node 4444
+            16:38:35.594  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.53) —> Node 4444
+            - (0.00) —> Node 2222
+
+            16:38:35.647 Route received at Node 2222 from Node 3333
+            16:38:35.648  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.50) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:36.157 Link from 2222 to 3333: 413 packets sent, 73 packets lost, loss rate 17%
+            16:38:36.199 Received probe message from 1111 to 2222
+            16:38:36.199  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.50) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:37.164 Link from 2222 to 3333: 432 packets sent, 75 packets lost, loss rate 17%
+            16:38:37.443 Received probe message from 1111 to 2222
+            16:38:37.443  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.50) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:38.174 Link from 2222 to 3333: 441 packets sent, 78 packets lost, loss rate 17%
+            16:38:38.274 Received probe message from 1111 to 2222
+            16:38:38.274  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.50) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:38.276 Route received at Node 2222 from Node 1111
+            16:38:38.277  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.50) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:39.181 Link from 2222 to 3333: 443 packets sent, 80 packets lost, loss rate 18%
+            16:38:39.520 Received probe message from 1111 to 2222
+            16:38:39.522  Node 2222 Routing table 
+            - (0.13) —> Node 3333
+            - (0.07) —> Node 1111
+            - (0.50) —> Node 4444; Next hop —> Node 3333
+            - (0.00) —> Node 2222
+
+            16:38:40.188 Link from 2222 to 3333: 445 packets sent, 82 packets lost, loss rate 18%
+            ^C%                                                                             
+
+
 
         User 3333:
+            java -cp "./" CNNode 3333 receive 1111 .5 2222 .2 send 4444
 
+            CNNode started
+            16:37:44.755 Receive Thread started 3333
+            16:37:44.766  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:04.698 Route received at Node 3333 from Node 4444
+            16:38:04.703  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:04.704 Probe thread running 3333
+            16:38:04.705 Route was sent from Node 3333 to Node 1111
+            16:38:04.705 Route was sent from Node 3333 to Node 4444
+            16:38:04.705 Route was sent from Node 3333 to Node 2222
+            16:38:04.773 Route received at Node 3333 from Node 2222
+            16:38:04.773  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:04.792 Route received at Node 3333 from Node 4444
+            16:38:04.793  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:04.848 Route received at Node 3333 from Node 1111
+            16:38:04.850  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:05.330 Link from 3333 to 4444: 1 packets sent, 0 packets lost, loss rate 0%
+            16:38:05.604 Received probe message from 2222 to 3333
+            16:38:05.605  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (1.00) —> Node 1111
+            - (1.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:06.339 Link from 3333 to 4444: 17 packets sent, 2 packets lost, loss rate 11%
+            16:38:07.346 Link from 3333 to 4444: 35 packets sent, 9 packets lost, loss rate 25%
+            16:38:08.246 Received probe message from 1111 to 3333
+            16:38:08.248  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.39) —> Node 1111
+            - (1.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:08.355 Link from 3333 to 4444: 42 packets sent, 12 packets lost, loss rate 28%
+            16:38:09.211 Received probe message from 2222 to 3333
+            16:38:09.213  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.39) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.18) —> Node 2222
+
+            16:38:09.359 Link from 3333 to 4444: 47 packets sent, 17 packets lost, loss rate 36%
+            16:38:09.860 Route was sent from Node 3333 to Node 1111
+            16:38:09.861 Route was sent from Node 3333 to Node 4444
+            16:38:09.861 Route was sent from Node 3333 to Node 2222
+            16:38:09.943 Received probe message from 2222 to 3333
+            16:38:09.943  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.39) —> Node 1111
+            - (1.00) —> Node 4444
+            - (0.15) —> Node 2222
+
+            16:38:09.948 Route received at Node 3333 from Node 4444
+            16:38:09.949  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.39) —> Node 1111
+            - (0.25) —> Node 4444
+            - (0.15) —> Node 2222
+
+            16:38:10.466 Link from 3333 to 4444: 54 packets sent, 19 packets lost, loss rate 35%
+            16:38:11.167 Received probe message from 2222 to 3333
+            16:38:11.168  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.39) —> Node 1111
+            - (0.25) —> Node 4444
+            - (0.16) —> Node 2222
+
+            16:38:11.475 Link from 3333 to 4444: 56 packets sent, 21 packets lost, loss rate 37%
+            16:38:12.170 Received probe message from 1111 to 3333
+            16:38:12.171  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.25) —> Node 4444
+            - (0.16) —> Node 2222
+
+            16:38:12.412 Received probe message from 2222 to 3333
+            16:38:12.413  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.25) —> Node 4444
+            - (0.15) —> Node 2222
+
+            16:38:12.479 Link from 3333 to 4444: 65 packets sent, 24 packets lost, loss rate 36%
+            16:38:13.228 Received probe message from 2222 to 3333
+            16:38:13.229  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.25) —> Node 4444
+            - (0.15) —> Node 2222
+
+            16:38:13.335 Route received at Node 3333 from Node 2222
+            16:38:13.336  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.25) —> Node 4444
+            - (0.15) —> Node 2222
+
+            16:38:13.485 Link from 3333 to 4444: 78 packets sent, 27 packets lost, loss rate 34%
+            16:38:14.059 Received probe message from 2222 to 3333
+            16:38:14.060  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.25) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:14.493 Link from 3333 to 4444: 86 packets sent, 32 packets lost, loss rate 37%
+            16:38:14.995 Route was sent from Node 3333 to Node 1111
+            16:38:14.995 Route was sent from Node 3333 to Node 4444
+            16:38:14.996 Route was sent from Node 3333 to Node 2222
+            16:38:14.997 Route received at Node 3333 from Node 4444
+            16:38:14.999  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.37) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:15.296 Received probe message from 2222 to 3333
+            16:38:15.297  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.37) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:15.603 Link from 3333 to 4444: 95 packets sent, 36 packets lost, loss rate 37%
+            16:38:16.519 Received probe message from 2222 to 3333
+            16:38:16.520  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.41) —> Node 1111
+            - (0.37) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:16.610 Link from 3333 to 4444: 100 packets sent, 39 packets lost, loss rate 39%
+            16:38:17.032 Received probe message from 1111 to 3333
+            16:38:17.034  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.49) —> Node 1111
+            - (0.37) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:17.618 Link from 3333 to 4444: 107 packets sent, 40 packets lost, loss rate 37%
+            16:38:18.376 Received probe message from 2222 to 3333
+            16:38:18.377  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.49) —> Node 1111
+            - (0.37) —> Node 4444
+            - (0.15) —> Node 2222
+
+            16:38:18.626 Link from 3333 to 4444: 113 packets sent, 46 packets lost, loss rate 40%
+            16:38:19.203 Received probe message from 2222 to 3333
+            16:38:19.204  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.49) —> Node 1111
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:19.206 Route received at Node 3333 from Node 2222
+            16:38:19.208  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.25) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:19.635 Link from 3333 to 4444: 121 packets sent, 51 packets lost, loss rate 42%
+            16:38:20.136 Route was sent from Node 3333 to Node 1111
+            16:38:20.136 Route was sent from Node 3333 to Node 4444
+            16:38:20.136 Route was sent from Node 3333 to Node 2222
+            16:38:20.151 Route received at Node 3333 from Node 4444
+            16:38:20.152  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.25) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:20.438 Received probe message from 2222 to 3333
+            16:38:20.439  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.25) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:20.741 Link from 3333 to 4444: 130 packets sent, 55 packets lost, loss rate 42%
+            16:38:21.265 Received probe message from 2222 to 3333
+            16:38:21.267  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.25) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:21.474 Received probe message from 1111 to 3333
+            16:38:21.475  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.25) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:21.746 Link from 3333 to 4444: 138 packets sent, 61 packets lost, loss rate 44%
+            16:38:21.891 Received probe message from 2222 to 3333
+            16:38:21.892  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.25) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:21.989 Route received at Node 3333 from Node 2222
+            16:38:21.989  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:22.752 Link from 3333 to 4444: 140 packets sent, 63 packets lost, loss rate 45%
+            16:38:22.814 Received probe message from 2222 to 3333
+            16:38:22.814  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:23.753 Link from 3333 to 4444: 142 packets sent, 65 packets lost, loss rate 45%
+            16:38:24.761 Link from 3333 to 4444: 149 packets sent, 67 packets lost, loss rate 44%
+            16:38:25.263 Route was sent from Node 3333 to Node 1111
+            16:38:25.264 Route was sent from Node 3333 to Node 4444
+            16:38:25.264 Route was sent from Node 3333 to Node 2222
+            16:38:25.305 Route received at Node 3333 from Node 4444
+            16:38:25.308  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.47) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:25.870 Link from 3333 to 4444: 159 packets sent, 71 packets lost, loss rate 44%
+            16:38:26.114 Received probe message from 2222 to 3333
+            16:38:26.116  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.47) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:26.812 Received probe message from 1111 to 3333
+            16:38:26.813  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.47) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:26.881 Link from 3333 to 4444: 167 packets sent, 73 packets lost, loss rate 43%
+            16:38:26.915 Route received at Node 3333 from Node 1111
+            16:38:26.916  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.47) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:27.874 Received probe message from 2222 to 3333
+            16:38:27.875  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.47) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:27.890 Link from 3333 to 4444: 170 packets sent, 76 packets lost, loss rate 44%
+            16:38:28.702 Received probe message from 2222 to 3333
+            16:38:28.704  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.47) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:28.898 Link from 3333 to 4444: 172 packets sent, 78 packets lost, loss rate 45%
+            16:38:29.906 Link from 3333 to 4444: 181 packets sent, 82 packets lost, loss rate 45%
+            16:38:30.411 Route was sent from Node 3333 to Node 1111
+            16:38:30.411 Route was sent from Node 3333 to Node 4444
+            16:38:30.411 Route was sent from Node 3333 to Node 2222
+            16:38:30.464 Route received at Node 3333 from Node 4444
+            16:38:30.465  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:30.560 Received probe message from 2222 to 3333
+            16:38:30.561  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:30.561 Route received at Node 3333 from Node 2222
+            16:38:30.561  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:31.017 Link from 3333 to 4444: 193 packets sent, 86 packets lost, loss rate 44%
+            16:38:31.359 Received probe message from 1111 to 3333
+            16:38:31.360  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:31.360 Route received at Node 3333 from Node 1111
+            16:38:31.361  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:31.454 Route received at Node 3333 from Node 1111
+            16:38:31.455  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:31.460 Route received at Node 3333 from Node 1111
+            16:38:31.461  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:32.025 Link from 3333 to 4444: 199 packets sent, 92 packets lost, loss rate 46%
+            16:38:32.302 Received probe message from 2222 to 3333
+            16:38:32.303  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:33.033 Link from 3333 to 4444: 211 packets sent, 94 packets lost, loss rate 44%
+            16:38:33.830 Received probe message from 1111 to 3333
+            16:38:33.831  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:34.042 Link from 3333 to 4444: 216 packets sent, 99 packets lost, loss rate 45%
+            16:38:34.681 Received probe message from 2222 to 3333
+            16:38:34.682  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.21) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.14) —> Node 2222
+
+            16:38:34.682 Route received at Node 3333 from Node 2222
+            16:38:34.683  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.20) —> Node 1111; Next hop —> Node 2222
+            - (0.37) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:35.051 Link from 3333 to 4444: 220 packets sent, 103 packets lost, loss rate 46%
+            16:38:35.553 Route was sent from Node 3333 to Node 1111
+            16:38:35.553 Route was sent from Node 3333 to Node 4444
+            16:38:35.554 Route was sent from Node 3333 to Node 2222
+            16:38:35.594 Route received at Node 3333 from Node 4444
+            16:38:35.594  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.20) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:36.117 Received probe message from 2222 to 3333
+            16:38:36.119  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.20) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:36.158 Link from 3333 to 4444: 235 packets sent, 110 packets lost, loss rate 46%
+            16:38:36.961 Received probe message from 2222 to 3333
+            16:38:36.966  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.20) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:37.165 Link from 3333 to 4444: 245 packets sent, 120 packets lost, loss rate 48%
+            16:38:38.171 Received probe message from 1111 to 3333
+            16:38:38.173  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.20) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.13) —> Node 2222
+
+            16:38:38.173 Route received at Node 3333 from Node 1111
+            16:38:38.173 Link from 3333 to 4444: 255 packets sent, 130 packets lost, loss rate 50%
+            16:38:38.174  Node 3333 Routing table 
+            - (0.00) —> Node 3333
+            - (0.20) —> Node 1111; Next hop —> Node 2222
+            - (0.40) —> Node 4444
+            - (0.13) —> Node 2222
+
+            ^C%                                                                            
         User 4444:
+            java -cp "./" CNNode 4444 receive 2222 .8 3333 .5 send last
+
+            CNNode started
+            16:38:04.589 Receive Thread started 4444
+            16:38:04.599  Node 4444 Routing table 
+            - (1.00) —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:04.605 Route was sent from Node 4444 to Node 3333
+            16:38:04.605 Route was sent from Node 4444 to Node 2222
+            16:38:04.711 Probe thread running 4444
+            16:38:04.711 Route was sent from Node 4444 to Node 3333
+            16:38:04.711 Route was sent from Node 4444 to Node 2222
+            16:38:04.762 Route received at Node 4444 from Node 3333
+            16:38:04.763  Node 4444 Routing table 
+            - (1.00) —> Node 3333
+            - (2.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:04.776 Route received at Node 4444 from Node 2222
+            16:38:04.777  Node 4444 Routing table 
+            - (1.00) —> Node 3333
+            - (2.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:06.627 Received probe message from 3333 to 4444
+            16:38:06.629  Node 4444 Routing table 
+            - (0.25) —> Node 3333
+            - (2.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:09.853 Route was sent from Node 4444 to Node 3333
+            16:38:09.853 Route was sent from Node 4444 to Node 2222
+            16:38:11.489 Received probe message from 3333 to 4444
+            16:38:11.490  Node 4444 Routing table 
+            - (0.39) —> Node 3333
+            - (2.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:13.248 Received probe message from 3333 to 4444
+            16:38:13.249  Node 4444 Routing table 
+            - (0.37) —> Node 3333
+            - (2.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:14.978 Route was sent from Node 4444 to Node 3333
+            16:38:14.978 Route was sent from Node 4444 to Node 2222
+            16:38:17.060 Received probe message from 3333 to 4444
+            16:38:17.062  Node 4444 Routing table 
+            - (0.40) —> Node 3333
+            - (2.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:20.102 Route was sent from Node 4444 to Node 3333
+            16:38:20.102 Route was sent from Node 4444 to Node 2222
+            16:38:24.580 Received probe message from 3333 to 4444
+            16:38:24.581  Node 4444 Routing table 
+            - (0.47) —> Node 3333
+            - (2.00) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:24.581 Route received at Node 4444 from Node 3333
+            16:38:24.583  Node 4444 Routing table 
+            - (0.47) —> Node 3333
+            - (1.39) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:25.234 Route was sent from Node 4444 to Node 3333
+            16:38:25.235 Route was sent from Node 4444 to Node 2222
+            16:38:29.039 Received probe message from 3333 to 4444
+            16:38:29.039  Node 4444 Routing table 
+            - (0.46) —> Node 3333
+            - (1.39) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (1.00) —> Node 2222
+
+            16:38:29.040 Route received at Node 4444 from Node 3333
+            16:38:29.040  Node 4444 Routing table 
+            - (0.25) —> Node 3333
+            - (0.66) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.38) —> Node 2222; Next hop —> Node 3333
+
+            16:38:29.040 Route received at Node 4444 from Node 3333
+            16:38:29.041  Node 4444 Routing table 
+            - (0.37) —> Node 3333
+            - (0.62) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.51) —> Node 2222; Next hop —> Node 3333
+
+            16:38:30.249 Received probe message from 2222 to 4444
+            16:38:30.250  Node 4444 Routing table 
+            - (0.37) —> Node 3333
+            - (0.62) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.51) —> Node 2222; Next hop —> Node 3333
+
+            16:38:30.373 Route was sent from Node 4444 to Node 3333
+            16:38:30.373 Route was sent from Node 4444 to Node 2222
+            16:38:32.426 Received probe message from 3333 to 4444
+            16:38:32.428  Node 4444 Routing table 
+            - (0.37) —> Node 3333
+            - (0.62) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.51) —> Node 2222; Next hop —> Node 3333
+
+            16:38:32.443 Route received at Node 4444 from Node 3333
+            16:38:32.444  Node 4444 Routing table 
+            - (0.40) —> Node 3333
+            - (0.61) —> Node 1111; Next hop —> Node 3333
+            - (0.00) —> Node 4444
+            - (0.53) —> Node 2222; Next hop —> Node 3333
+
+            16:38:35.504 Route was sent from Node 4444 to Node 3333
+            16:38:35.504 Route was sent from Node 4444 to Node 2222
+            ^C%                                                                             
+
+
         
