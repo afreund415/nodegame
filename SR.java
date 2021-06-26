@@ -371,7 +371,7 @@ public class SR{
 
     //ensures port #s are between 
     public static int checkPort(int port) throws Exception{
-        if (port > 0xffff && port < 1024){
+        if (port > 0xffff || port < 1024){
             throw (new IndexOutOfBoundsException("Por needs to be greater " +
                                 "than 1024 and less than 65535"));
         }
