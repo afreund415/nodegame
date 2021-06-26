@@ -7,11 +7,11 @@ Programming Assignment #2
 Highlights: 
     1. 3 main programs, building on one another starting with SRNode, run through 3 separate CLIs. 
     2. Can test each program on a single instance using specialized commandline arguments. This is helfpul for analyzing DVNode and CNNode.
-    3. Leverages Mulithreading, HashMaps, ArrayLists, and native java packages for all handling
+    3. Leverages Mulithreading, HashMaps, ArrayLists, and native java packages for all data structures 
 
 Known issues: 
     1. At times I have messy code when it comes to converting between ints and shorts. Apologies. 
-    2. 
+    2. For CNNode where link distances are dynamic, I Initialize node distances to 1. This can lead to some odd initial results but eventually the link weights converge to what is expected.  
 
 
 Installing the project:
@@ -19,7 +19,7 @@ Installing the project:
     2. Run <make> in folder
 
 Running:
-    1. See separate readMes below on the programs: SRNode, DVNode, & CNNode
+    1. See separate readMes below on how to run the programs SRNode, DVNode, & CNNode
 
 
 SRNode readMe: 
@@ -39,16 +39,16 @@ SRNode readMe:
     SRNode architecture:
 
         SRNode: 
+            SRNode is the CLI for the selective repeat program. This class allows the user to utilize two send one-off messages to a receiver (on either 1 instance or 2) as well as a larger quantity of characters for testing. The class also validates port numbers, interprets whether the user would like to use deterministic or probabilistic packet dropping, and calls the selective repeat constructor.   
 
         SR: 
+            The SR class is where the vast majority of the selective repeat logic is implemented. The class contains a constructor, a send thread, a receive thread, and a "sendHelper" thread for resending dropped packets or packets that have timed-out. The class also contains several other methods to assist in the functioning of this program as well as DVNode and CNNode. The class has several printing methods for errors, strings, and packets, a checkPort validator method, a thread sleeper method, sender and receiver "end-of-message" logic handlers, ACK sending method. The class also leverages a sendQueue which acts as a sending buffer to avoid packet flooding and errors.    
 
         Link: 
+            Link class represents link between local port and remote port for sending and receiving messages. Each remote port has its own link. the class is very short and simply has a constructor that initializes the link's receive and sender windows, the remote port, the loss probability, and the sendQueue, which is an arraylist of Thread. The link class also contains a number of instant variables that are used in other classes for handling link-level logic. 
 
         Packet: 
-
-
-
-
+            The packet class represents a single packet that is sent or received over the wire. Each packet has a data field, sequence number field, and a status flag. The class contains different types of packet constructors, several byte conversion methods, copy method, and a toString method. 
 
 
 
@@ -70,16 +70,14 @@ DVNode readMe:
     DVNode architecture: 
 
         DVNode: 
-
-        SR: 
-
-        Link: 
-
-        Packet: 
-
-        Route: 
+            DVNode is the CLI for the distantce vector algorithm program. It establishes nodes on the network with user-determined distances and links between them and, once all router nodes have been created, propagates the routing tables between all nodes in the network. The CLI allows users to display a node's routing table (or all nodes if running on a single instance) with the command <show>. 
 
         Router:
+            The router class handles all logic for for individual nodes for both DVNode and CNNode. The class extends the SR class for sending and receiving packets. The class has methods for constructing router nodes, adding routes to local routing tables, sending route method for sharing DV tables with other nodes, end of message logic for handling probes and routing table messages. The class also has several helper methods for converting routing tables to strings, handling byte conversions, print messages, as well as a probing thread for CNNnode. The class also leverages a separate Route class that represents a single route. 
+
+        Route: 
+            The route class represents a route between 2 nodes in the network. The router class is utilized by the router class mainly. The constructor creates a route by taking into consideration the route's source port, destination port, next hop port, the route distance, and the route "mode". The class also maintains an incoming route table for processing routes received from other nodes as an intermediary step before adding them to the authoritative routing table. The class has a "normal" as well as a byte constructor and a few helper methods. Route objects are a crucial piece of the infrastructure of the distance vector programs.      
+
 
 
 
@@ -108,19 +106,15 @@ CNNode readMe:
             2. ctrl+C exits the program
     
     CNNode architecture: 
-        CNNode utilizes SR infrastructure to exchange routes in addition to the probing packages. However, these routes and probes are sent in one SR packet and are exempt from all loss probabilities and lost ACKs. 
-
+        
         CNNode: 
-
-        SR: 
-
-        Link: 
-
-        Packet: 
-
-        Route: 
+            CNNode is the CLI for the dynamic distance vector program, in which probes are sent out and routing tables are adjusted in real time to respond to lossed packages ocurring over links. The program functions very much like DVNode with the exception of the intruduction of probing messages and dyanmic link distance changes (based on lost packets). CNNode utilizes SR infrastructure to exchange routes in addition to the probing packages. However, these routes and probes are sent in one SR packet and are exempt from all loss probabilities and lost ACKs. The program allows a user to display routing tables, like in DVNNode, with a <show> command.
 
         Router:
+             The probe thread in the router class, where the router logic is implemented, sends out probes. The calcRoutes function, calculates routes based on external routing table updates and probes. The function takes a number of factors into consideration before updating a specific route. Almost all of the other router node logic occurs in this class. 
+
+        Other classes: 
+            CNNode, since the architecture of the project builds on top of each other, also relies on the previously described classes of Link, Packet, SR, and Route. 
         
     
 

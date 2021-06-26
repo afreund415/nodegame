@@ -25,7 +25,7 @@ public class Route {
     public Route(short dest, short dist, short next, short port, char mode){
         this.dest = dest;
         this.dist = (dest != port && dist == 0)?100: dist;
-        this.next = next; 
+        this.next = next;
         this.port = port;
         this.mode = mode;
     }

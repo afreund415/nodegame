@@ -121,6 +121,7 @@ public class SR{
         return false;
     }
 
+    //Sending thread 
     class Send extends Thread{
         int remotePort; 
         byte[] data; 
@@ -129,6 +130,7 @@ public class SR{
         int len;
         boolean sendSinglePacket = false; 
 
+        //send constructor 
         public Send(byte[] data, int len, int remotePort, String addr,boolean sendSinglePacket){
             this.data = data; 
             this.len = len;
@@ -137,6 +139,7 @@ public class SR{
             this.sendSinglePacket = sendSinglePacket;
             l = getLink(remotePort);    
         }
+
         public void run(){
 
             try{
@@ -228,6 +231,7 @@ public class SR{
     }
 
 
+    //Receive thread 
     class Receive extends Thread{
 
         public void run(){
@@ -355,6 +359,7 @@ public class SR{
         l.sendCount = 0;
         l.sendLoss = 0;
     }
+
     //sleeper method to give threads breathing room
     public void sleepMs(int i){
         try{

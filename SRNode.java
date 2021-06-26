@@ -43,7 +43,7 @@ public class SRNode {
                     node.noDropACK = true;
                     String outString = "";
                     int charCount = Integer.parseInt(newArgs[1]);
-
+                    //creates a random string of x chars, where x is determined by user
                     for (int i = 0; i < charCount; i++){
                         char c = (char) ((node.random.nextInt(97) & 0xff) + 32); 
                         outString += c;

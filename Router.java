@@ -235,7 +235,7 @@ public class Router extends SR {
                                     printMessage("Link from " + localPort + " to " + l.remotePort + ": " + 
                                                     l.sendCount + " packets sent, " + l.sendLoss + 
                                                     " packets lost, loss rate " + 
-                                    (l.sendLoss * 100 / l.sendCount) + "%");
+                                                    (l.sendLoss * 100 / l.sendCount) + "%");
                                     sendMillis = System.currentTimeMillis();
                                 }
                                 if (sendReady(r.dest, 3)){
